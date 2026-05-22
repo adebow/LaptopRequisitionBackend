@@ -1,0 +1,27 @@
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+[Bb]in/
+[Oo]bj/
+*.log
+*.pdb
+*.ilk
+
+# Packages
+*.nupkg
+*.snupkg
+
+# IDE-specific files
+.idea/ # For Rider/IntelliJ
+
+# User secrets and configuration
+appsettings.Development.json
+appsettings.Production.json # If you plan to use environment variables for secrets
+appsettings.*.json # Catch other environment-specific appsettings
+*.usersecrets
