@@ -1,9 +1,6 @@
 ﻿using LaptopRequisition.Domain;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+
 
 namespace LaptopRequisition.Infrastructure
 {
@@ -14,7 +11,7 @@ namespace LaptopRequisition.Infrastructure
         }
 
         public DbSet<Employee> Employees { get; set; }
-        public DbSet<Department> Departments { get; set; } // Added DbSet for Department
+        public DbSet<Department> Departments { get; set; } 
        public DbSet<Laptop> Laptops { get; set; }
         public DbSet<Request> Requests { get; set; }
         public DbSet<ReturnRequest> ReturnRequests { get; set; }
@@ -116,16 +113,14 @@ namespace LaptopRequisition.Infrastructure
                       .WithMany(l => l.ReturnRequests)
                       .HasForeignKey(rr => rr.LaptopId);
             });
-
-            // Configure Notification entity
+            
             modelBuilder.Entity<Notification>(entity =>
             {
                 entity.HasOne(n => n.Employee)
                       .WithMany(e => e.Notifications)
                       .HasForeignKey(n => n.EmployeeId);
             });
-
-            // Configure PasswordResetToken entity
+            
             modelBuilder.Entity<PasswordResetToken>(entity =>
             {
                 entity.HasIndex(prt => prt.Token).IsUnique();
@@ -178,7 +173,7 @@ namespace LaptopRequisition.Infrastructure
                         employee.UpdatedAt = DateTime.UtcNow;
                     }
                 }
-                else if (entry.Entity is Department department) // Added Department handling
+                else if (entry.Entity is Department department) 
                 {
                     if (entry.State == EntityState.Added)
                     {

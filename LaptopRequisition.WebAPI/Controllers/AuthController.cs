@@ -1,8 +1,7 @@
 ﻿using LaptopRequisition.Application.DTOs;
 using LaptopRequisition.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Threading.Tasks;
+
 
 namespace LaptopRequisition.WebAPI.Controllers
 {
@@ -36,7 +35,6 @@ namespace LaptopRequisition.WebAPI.Controllers
             }
             catch (Exception ex)
             {
-                // Log the exception (e.g., using a logger)
                 return StatusCode(500,
                     new { Message = "An error occurred during registration.", Details = ex.Message });
             }
@@ -61,7 +59,6 @@ namespace LaptopRequisition.WebAPI.Controllers
             }
             catch (Exception ex)
             {
-                // Log the exception
                 return StatusCode(500, new { Message = "An error occurred during login.", Details = ex.Message });
             }
         }
@@ -82,7 +79,6 @@ namespace LaptopRequisition.WebAPI.Controllers
             }
             catch (Exception ex)
             {
-                // Log the exception
                 return StatusCode(500,
                     new { Message = "An error occurred during password reset request.", Details = ex.Message });
             }

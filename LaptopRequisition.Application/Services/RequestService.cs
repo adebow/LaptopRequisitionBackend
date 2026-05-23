@@ -13,17 +13,20 @@ namespace LaptopRequisition.Application.Services
         private readonly IRequestRepository _requestRepository;
         private readonly IEmployeeRepository _employeeRepository;
         private readonly ILaptopRepository _laptopRepository;
+        private readonly INotificationService _notificationService;
 
         public RequestService(
             IRequestRepository requestRepository,
             IEmployeeRepository employeeRepository,
             ILaptopRepository laptopRepository,
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            INotificationService notificationService)
         {
             _requestRepository = requestRepository;
             _employeeRepository = employeeRepository;
             _laptopRepository = laptopRepository;
             _httpContextAccessor = httpContextAccessor;
+            _notificationService = notificationService; 
         }
         private Guid GetCurrentEmployeeId()
         {
@@ -59,6 +62,8 @@ namespace LaptopRequisition.Application.Services
             };
 
             await _requestRepository.AddAsync(request);
+            
+            await _notificationService.CreateNotificationAsync(employeeId, $"Your laptop request (ID: {request.Id.ToString().Substring(0, 8)}...) has been submitted successfully.");
 
             return Map(request);
         }
@@ -99,9 +104,11 @@ namespace LaptopRequisition.Application.Services
 
             request.Status = RequestStatus.Approved;
             request.UpdatedAt = DateTime.UtcNow;
-            request.ApprovedRejectedAt = DateTime.UtcNow; // Set ApprovedRejectedAt
+            request.ApprovedRejectedAt = DateTime.UtcNow; 
 
             await _requestRepository.UpdateAsync(request);
+            
+            await _notificationService.CreateNotificationAsync(request.EmployeeId, $"Your laptop request (ID: {request.Id.ToString().Substring(0, 8)}...) has been approved!");
         }
         
         public async Task RejectRequestAsync(Guid requestId, string reason)
@@ -115,11 +122,13 @@ namespace LaptopRequisition.Application.Services
                 throw new InvalidOperationException("Only pending requests can be rejected.");
 
             request.Status = RequestStatus.Rejected;
-            request.RejectionReason = reason; // Set rejection reason
+            request.RejectionReason = reason; 
             request.UpdatedAt = DateTime.UtcNow;
-            request.ApprovedRejectedAt = DateTime.UtcNow; // Set ApprovedRejectedAt
+            request.ApprovedRejectedAt = DateTime.UtcNow;
 
             await _requestRepository.UpdateAsync(request);
+            
+            await _notificationService.CreateNotificationAsync(request.EmployeeId, $"Your laptop request (ID: {request.Id.ToString().Substring(0, 8)}...) has been rejected. Reason: {reason}");
         }
         
         public async Task AssignLaptopAsync(Guid requestId, Guid laptopId)
@@ -139,39 +148,38 @@ namespace LaptopRequisition.Application.Services
             request.LaptopId = laptopId;
             request.Status = RequestStatus.Assigned;
             request.UpdatedAt = DateTime.UtcNow;
-            request.AssignedAt = DateTime.UtcNow; // Set AssignedAt
+            request.AssignedAt = DateTime.UtcNow;
 
             laptop.IsAssigned = true;
             await _laptopRepository.UpdateAsync(laptop);
 
             await _requestRepository.UpdateAsync(request);
+            
+            await _notificationService.CreateNotificationAsync(request.EmployeeId, $"A laptop ({laptop.SerialNumber}) has been assigned to your request (ID: {request.Id.ToString().Substring(0, 8)}...). Please check your request status.");
         }
         
         private RequestResponseDto Map(Request request)
         {
-            // Eager load Employee and Laptop if needed for EmployeeName and LaptopName
-            // For now, these will be null if not loaded.
-            // This might require changes in IRequestRepository.GetByIdAsync or GetAllAsync to include Employee/Laptop.
-            var employee = _employeeRepository.GetByIdAsync(request.EmployeeId).Result; // Synchronous call for simplicity, consider async
-            var laptop = request.LaptopId.HasValue ? _laptopRepository.GetByIdAsync(request.LaptopId.Value).Result : null; // Synchronous call for simplicity, consider async
+           var employee = _employeeRepository.GetByIdAsync(request.EmployeeId).Result; 
+            var laptop = request.LaptopId.HasValue ? _laptopRepository.GetByIdAsync(request.LaptopId.Value).Result : null;
 
             return new RequestResponseDto
             {
                 Id = request.Id,
                 EmployeeId = request.EmployeeId,
-                EmployeeName = employee?.FullName, // Map EmployeeName
-                Status = request.Status, // Corrected: Assign enum directly
+                EmployeeName = employee?.FullName,
+                Status = request.Status, 
                 Purpose = request.Purpose,
                 PreferredSpecs = request.PreferredSpecs,
-                IsSwapRequest = request.IsSwapRequest, // Map IsSwapRequest
-                RejectionReason = request.RejectionReason, // Map RejectionReason
+                IsSwapRequest = request.IsSwapRequest, 
+                RejectionReason = request.RejectionReason, 
                 LaptopId = request.LaptopId,
-                LaptopName = laptop?.SerialNumber, // Map LaptopName (assuming SerialNumber is a good name)
-                IsReceiptConfirmed = request.IsReceiptConfirmed, // Map IsReceiptConfirmed
+                LaptopName = laptop?.SerialNumber,
+                IsReceiptConfirmed = request.IsReceiptConfirmed,
                 CreatedAt = request.CreatedAt,
-                ApprovedRejectedAt = request.ApprovedRejectedAt, // Map ApprovedRejectedAt
-                AssignedAt = request.AssignedAt, // Map AssignedAt
-                ReceiptConfirmedAt = request.ReceiptConfirmedAt // Map ReceiptConfirmedAt
+                ApprovedRejectedAt = request.ApprovedRejectedAt,
+                AssignedAt = request.AssignedAt,
+                ReceiptConfirmedAt = request.ReceiptConfirmedAt
             };
         }
     }

@@ -8,7 +8,7 @@
         public bool IsRead { get; set; }
         public DateTime CreatedAt { get; set; }
 
-        // Navigation properties
+        
         public Employee Employee { get; set; }
     }
 }

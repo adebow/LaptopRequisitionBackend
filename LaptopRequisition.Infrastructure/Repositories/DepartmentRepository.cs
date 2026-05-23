@@ -1,9 +1,6 @@
 ﻿using LaptopRequisition.Application.Interfaces;
 using LaptopRequisition.Domain;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace LaptopRequisition.Infrastructure.Repositories
 {

@@ -2,7 +2,6 @@
 using LaptopRequisition.Domain;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -21,20 +20,19 @@ namespace LaptopRequisition.Infrastructure.Services
         public string GenerateToken(Employee employee)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            // FIX: Changed Encoding.ASCII.GetBytes to Encoding.UTF8.GetBytes for consistency with Program.cs
             var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Secret"]);
 
             var claims = new ClaimsIdentity(new[]
             {
                 new Claim(ClaimTypes.NameIdentifier, employee.Id.ToString()),
                 new Claim(ClaimTypes.Email, employee.Email),
-                new Claim(ClaimTypes.Role, employee.Role) // Assuming Role is loaded
+                new Claim(ClaimTypes.Role, employee.Role) 
             });
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = claims,
-                Expires = DateTime.UtcNow.AddHours(1), // Token expires in 1 hour
+                Expires = DateTime.UtcNow.AddHours(1),
                 Issuer = _configuration["Jwt:Issuer"],
                 Audience = _configuration["Jwt:Audience"],
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)

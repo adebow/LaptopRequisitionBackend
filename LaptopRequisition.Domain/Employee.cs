@@ -3,9 +3,9 @@
     public class Employee
     {
         public Guid Id { get; set; }
-        public string StaffId { get; set; } // unique
+        public string StaffId { get; set; } 
         public string FullName { get; set; }
-        public string Email { get; set; } // unique
+        public string Email { get; set; }
         public string PhoneNumber { get; set; }
         public Guid DepartmentId { get; set; } 
         public String Role { get; set; }       

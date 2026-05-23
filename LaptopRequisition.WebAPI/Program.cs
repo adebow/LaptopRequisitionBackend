@@ -74,6 +74,7 @@ builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IRequestService, RequestService>();
 builder.Services.AddScoped<ILaptopService, LaptopService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -96,7 +97,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend",
         builder =>
         {
-            builder.WithOrigins("https://laptop-requisition-form.vercel.app/") // Your frontend URL
+            builder.WithOrigins("https://laptop-requisition-form.vercel.app/") 
                    .AllowAnyHeader()
                    .AllowAnyMethod();
         });

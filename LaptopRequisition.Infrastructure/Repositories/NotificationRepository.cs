@@ -1,11 +1,7 @@
 ﻿using LaptopRequisition.Application.Interfaces;
 using LaptopRequisition.Domain;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace LaptopRequisition.Infrastructure.Repositories
 {
@@ -18,27 +14,6 @@ namespace LaptopRequisition.Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task<Notification> GetByIdAsync(Guid id)
-        {
-            return await _context.Notifications
-                                 .Include(n => n.Employee)
-                                 .FirstOrDefaultAsync(n => n.Id == id);
-        }
-
-        public async Task<IEnumerable<Notification>> GetByEmployeeIdAsync(Guid employeeId)
-        {
-            return await _context.Notifications
-                                 .Include(n => n.Employee)
-                                 .Where(n => n.EmployeeId == employeeId)
-                                 .ToListAsync();
-        }
-
-        public async Task<IEnumerable<Notification>> GetAllAsync()
-        {
-            return await _context.Notifications
-                                 .Include(n => n.Employee)
-                                 .ToListAsync();
-        }
 
         public async Task AddAsync(Notification notification)
         {
@@ -52,7 +27,40 @@ namespace LaptopRequisition.Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(Guid id)
+        public async Task<Notification?> GetByIdAsync(Guid id) // Changed return type to Notification?
+        {
+            return await _context.Notifications.FindAsync(id);
+        }
+
+        public async Task<IEnumerable<Notification>> GetByEmployeeIdAsync(
+Guid employeeId, bool unreadOnly = false)
+        {
+            var query = _context.Notifications
+                                .Where(n => n.EmployeeId == employeeId);
+
+            if (unreadOnly)
+            {
+                query = query.Where(n => !n.IsRead);
+            }
+
+            return await query.OrderByDescending(n => n.CreatedAt).ToListAsync();
+        }
+
+        public async Task<IEnumerable<Notification>> GetLatestByEmployeeIdAsync(Guid employeeId, int count)
+        {
+            return await _context.Notifications
+                                .Where(n => n.EmployeeId == employeeId)
+                                .OrderByDescending(n => n.CreatedAt)
+                                .Take(count)
+                                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Notification>> GetAllAsync() // Implemented GetAllAsync
+        {
+            return await _context.Notifications.OrderByDescending(n => n.CreatedAt).ToListAsync();
+        }
+
+        public async Task DeleteAsync(Guid id) // Implemented DeleteAsync
         {
             var notification = await _context.Notifications.FindAsync(id);
             if (notification != null)
@@ -60,6 +68,12 @@ namespace LaptopRequisition.Infrastructure.Repositories
                 _context.Notifications.Remove(notification);
                 await _context.SaveChangesAsync();
             }
+        }
+
+        public async Task UpdateRangeAsync(IEnumerable<Notification> notifications)
+        {
+            _context.Notifications.UpdateRange(notifications);
+            await _context.SaveChangesAsync();
         }
     }
 }

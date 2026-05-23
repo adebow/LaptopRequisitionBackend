@@ -1,7 +1,5 @@
 ﻿using LaptopRequisition.Domain;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+
 
 namespace LaptopRequisition.Application.Interfaces
 {

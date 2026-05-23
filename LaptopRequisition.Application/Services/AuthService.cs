@@ -1,12 +1,7 @@
 ﻿using LaptopRequisition.Application.DTOs;
 using LaptopRequisition.Application.Interfaces;
 using LaptopRequisition.Domain;
-using System;
-using System.Threading.Tasks;
-using BCrypt.Net;
-using System.Text.Json; // Added for JSON serialization/deserialization
-using System.Collections.Generic;
-using System.Linq;
+using System.Text.Json; 
 
 namespace LaptopRequisition.Application.Services
 {
@@ -16,24 +11,23 @@ namespace LaptopRequisition.Application.Services
         private readonly IJwtService _jwtService;
         private readonly IPasswordResetTokenRepository _passwordResetTokenRepository;
         private readonly IEmailService _emailService;
-        private readonly IDepartmentRepository _departmentRepository; // Added
+        private readonly IDepartmentRepository _departmentRepository;
 
         public AuthService(IEmployeeRepository employeeRepository,
                            IJwtService jwtService,
                            IPasswordResetTokenRepository passwordResetTokenRepository,
                            IEmailService emailService,
-                           IDepartmentRepository departmentRepository) // Added
+                           IDepartmentRepository departmentRepository)
         {
             _employeeRepository = employeeRepository;
             _jwtService = jwtService;
             _passwordResetTokenRepository = passwordResetTokenRepository;
             _emailService = emailService;
-            _departmentRepository = departmentRepository; // Assigned
+            _departmentRepository = departmentRepository;
         }
 
         public async Task<Employee> RegisterEmployeeAsync(RegisterEmployeeDto registerDto)
         {
-            // Validate unique StaffId and Email
             var existingEmployeeByStaffId = await _employeeRepository.GetByStaffIdAsync(registerDto.StaffId);
             if (existingEmployeeByStaffId != null)
             {
@@ -45,15 +39,13 @@ namespace LaptopRequisition.Application.Services
             {
                 throw new InvalidOperationException("Email is already registered.");
             }
-
-            // Validate DepartmentId exists
-            var department = await _departmentRepository.GetByIdAsync(registerDto.DepartmentId); // Changed to GetByIdAsync
+            
+            var department = await _departmentRepository.GetByIdAsync(registerDto.DepartmentId); 
             if (department == null)
             {
-                throw new InvalidOperationException($"Department with ID '{registerDto.DepartmentId}' not found."); // Updated error message
+                throw new InvalidOperationException($"Department with ID '{registerDto.DepartmentId}' not found."); 
             }
-
-            // Hash password
+            
             string passwordHash = BCrypt.Net.BCrypt.HashPassword(registerDto.Password);
 
             var employee = new Employee
@@ -63,12 +55,12 @@ namespace LaptopRequisition.Application.Services
                 FullName = registerDto.FullName,
                 Email = registerDto.Email,
                 PhoneNumber = registerDto.PhoneNumber,
-                DepartmentId = registerDto.DepartmentId, // Directly assign DepartmentId
-                Role = registerDto.Role, // Role remains string for now
+                DepartmentId = registerDto.DepartmentId, 
+                Role = registerDto.Role, 
                 PasswordHash = passwordHash,
                 FailedLoginCount = 0,
                 IsLocked = false,
-                PreviousPasswordHashes = JsonSerializer.Serialize(new List<string> { passwordHash }) // Store initial password hash
+                PreviousPasswordHashes = JsonSerializer.Serialize(new List<string> { passwordHash }) 
             };
 
             await _employeeRepository.AddAsync(employee);
@@ -111,7 +103,6 @@ namespace LaptopRequisition.Application.Services
             var employee = await _employeeRepository.GetByEmailAsync(email);
             if (employee == null)
             {
-                // For security, don't reveal if the email exists or not
                 return true;
             }
 
@@ -121,13 +112,12 @@ namespace LaptopRequisition.Application.Services
                 Id = Guid.NewGuid(),
                 EmployeeId = employee.Id,
                 Token = token,
-                ExpiresAt = DateTime.UtcNow.AddHours(1), // Token valid for 1 hour
+                ExpiresAt = DateTime.UtcNow.AddHours(1), 
                 IsUsed = false
             };
 
             await _passwordResetTokenRepository.AddAsync(passwordResetToken);
-
-            // In a real application, construct a proper reset link
+            
             var resetLink = $"https://yourdomain.com/reset-password?token={token}";
             await _emailService.SendEmailAsync(employee.Email, "Password Reset Request", $"Please use the following link to reset your password: {resetLink}");
 
@@ -150,7 +140,7 @@ namespace LaptopRequisition.Application.Services
             }
             
             var previousHashes = JsonSerializer.Deserialize<List<string>>(employee.PreviousPasswordHashes)
-                                 ?? new List<string>(); // Modified line
+                                 ?? new List<string>(); 
             foreach (var oldHash in previousHashes)
             {
                 if (BCrypt.Net.BCrypt.Verify(newPassword, oldHash))
@@ -165,16 +155,14 @@ namespace LaptopRequisition.Application.Services
             previousHashes.Add(newPasswordHash);
             if (previousHashes.Count > 3)
             {
-                previousHashes.RemoveAt(0); // Keep only the last 3
+                previousHashes.RemoveAt(0); 
             }
             employee.PreviousPasswordHashes = JsonSerializer.Serialize(previousHashes);
-
-            // Update employee password and reset login related fields
+            
             employee.PasswordHash = newPasswordHash;
             employee.FailedLoginCount = 0;
             employee.IsLocked = false;
-
-            // Mark token as used
+            
             resetToken.IsUsed = true;
 
             await _employeeRepository.UpdateAsync(employee);
@@ -190,16 +178,14 @@ namespace LaptopRequisition.Application.Services
             {
                 throw new InvalidOperationException("Employee not found.");
             }
-
-            // Verify current password
+            
             if (!BCrypt.Net.BCrypt.Verify(currentPassword, employee.PasswordHash))
             {
                 throw new UnauthorizedAccessException("Incorrect current password.");
             }
-
-            // Check against last 3 passwords
+            
             var previousHashes = JsonSerializer.Deserialize<List<string>>(employee.PreviousPasswordHashes)
-                                 ?? new List<string>(); // Modified line
+                                 ?? new List<string>(); 
             foreach (var oldHash in previousHashes)
             {
                 if (BCrypt.Net.BCrypt.Verify(newPassword, oldHash))
@@ -207,19 +193,16 @@ namespace LaptopRequisition.Application.Services
                     throw new InvalidOperationException("New password cannot be one of the last 3 used passwords.");
                 }
             }
-
-            // Hash new password
+            
             string newPasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
-
-            // Update previous password hashes
+            
             previousHashes.Add(newPasswordHash);
             if (previousHashes.Count > 3)
             {
-                previousHashes.RemoveAt(0); // Keep only the last 3
+                previousHashes.RemoveAt(0); 
             }
             employee.PreviousPasswordHashes = JsonSerializer.Serialize(previousHashes);
-
-            // Update employee password and reset login related fields
+            
             employee.PasswordHash = newPasswordHash;
             employee.FailedLoginCount = 0;
             employee.IsLocked = false;

@@ -16,83 +16,46 @@
     <configurations />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="237f1c0c-269e-4622-97e1-8938830e4738" name="Changes" comment="Initial LaptopRequisition setup with user authentication">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/.idea.LaptopRequisition/.idea/indexLayout.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/.idea.LaptopRequisition/.idea/vcs.xml" afterDir="false" />
+    <list default="true" id="237f1c0c-269e-4622-97e1-8938830e4738" name="Changes" comment="">
       <change afterPath="$PROJECT_DIR$/.idea/config/applicationhost.config" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/DTOs/.gitkeep" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/DTOs/AssignLaptopDto.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/DTOs/CreateDepartmentDto.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/DTOs/CreateLaptopDto.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/DTOs/CreateRequestDto.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/DTOs/DepartmentResponseDto.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/DTOs/LaptopResponseDto.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/DTOs/LoginDto.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/DTOs/RegisterEmployeeDto.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/DTOs/RejectRequestDto.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/DTOs/RequestHistoryDto.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/DTOs/RequestPasswordResetDto.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/DTOs/RequestResponseDto.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/DTOs/RequestStatusDto.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/DTOs/ResetPasswordDto.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/DTOs/UpdateDepartmentDto.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/DTOs/UpdateLaptopDto.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/Interfaces/IAuthService.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/Interfaces/IDepartmentRepository.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/Interfaces/IDepartmentService.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/Interfaces/IEmailService.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/Interfaces/IEmployeeRepository.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/Interfaces/IJwtService.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/Interfaces/ILaptopRepository.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/Interfaces/ILaptopService.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/Interfaces/INotificationRepository.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/Interfaces/IPasswordResetTokenRepository.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/Interfaces/IRequestRepository.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/Interfaces/IRequestService.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/Interfaces/IReturnRequestRepository.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/LaptopRequisition.Application.csproj" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/Services/.gitkeep" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/Services/AuthService.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/Services/DepartmentService.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/Services/LaptopService.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/Services/RequestService.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Domain/Department.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Domain/Employee.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Domain/Enums/RequestStatus.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Domain/Laptop.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Domain/LaptopRequisition.Domain.csproj" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Domain/Notification.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Domain/PasswordResetToken.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Domain/Request.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Domain/ReturnRequest.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Infrastructure/ApplicationDbContext.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Infrastructure/LaptopRequisition.Infrastructure.csproj" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/DTOs/CreateNotificationDto.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/DTOs/NotificationResponseDto.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/Interfaces/INotificationService.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/Services/NotificationService.cs" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/LaptopRequisition.Infrastructure/Migrations/ApplicationDbContextModelSnapshot.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Infrastructure/Repositories/DepartmentRepository.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Infrastructure/Repositories/EmployeeRepository.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Infrastructure/Repositories/LaptopRepository.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Infrastructure/Repositories/NotificationRepository.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Infrastructure/Repositories/PasswordResetTokenRepository.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Infrastructure/Repositories/RequestRepository.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Infrastructure/Repositories/ReturnRequestRepository.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Infrastructure/Services/.gitkeep" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Infrastructure/Services/EmailService.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Infrastructure/Services/JwtService.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.WebAPI/Controllers/.gitkeep" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.WebAPI/Controllers/AuthController.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.WebAPI/Controllers/DepartmentController.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.WebAPI/Controllers/LaptopController.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.WebAPI/Controllers/RequestsController.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.WebAPI/LaptopRequisition.WebAPI.csproj" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.WebAPI/LaptopRequisition.http" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.WebAPI/Middleware/ExceptionHandlingMiddleware.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.WebAPI/Program.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.WebAPI/Properties/launchSettings.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.WebAPI/appsettings.Development.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.WebAPI/appsettings.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.sln" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/global.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/LaptopRequisition.WebAPI/Controllers/NotificationsController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.LaptopRequisition/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.LaptopRequisition/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LaptopRequisition.Application/DTOs/CreateRequestDto.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LaptopRequisition.Application/DTOs/CreateRequestDto.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LaptopRequisition.Application/DTOs/DepartmentResponseDto.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LaptopRequisition.Application/DTOs/DepartmentResponseDto.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LaptopRequisition.Application/DTOs/RegisterEmployeeDto.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LaptopRequisition.Application/DTOs/RegisterEmployeeDto.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LaptopRequisition.Application/Interfaces/IDepartmentRepository.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LaptopRequisition.Application/Interfaces/IDepartmentRepository.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LaptopRequisition.Application/Interfaces/IDepartmentService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LaptopRequisition.Application/Interfaces/IDepartmentService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LaptopRequisition.Application/Interfaces/IEmailService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LaptopRequisition.Application/Interfaces/IEmailService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LaptopRequisition.Application/Interfaces/IEmployeeRepository.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LaptopRequisition.Application/Interfaces/IEmployeeRepository.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LaptopRequisition.Application/Interfaces/ILaptopRepository.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LaptopRequisition.Application/Interfaces/ILaptopRepository.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LaptopRequisition.Application/Interfaces/INotificationRepository.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LaptopRequisition.Application/Interfaces/INotificationRepository.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LaptopRequisition.Application/Interfaces/IPasswordResetTokenRepository.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LaptopRequisition.Application/Interfaces/IPasswordResetTokenRepository.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LaptopRequisition.Application/Interfaces/IRequestRepository.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LaptopRequisition.Application/Interfaces/IRequestRepository.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LaptopRequisition.Application/Interfaces/IRequestService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LaptopRequisition.Application/Interfaces/IRequestService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LaptopRequisition.Application/Interfaces/IReturnRequestRepository.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LaptopRequisition.Application/Interfaces/IReturnRequestRepository.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LaptopRequisition.Application/Services/AuthService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LaptopRequisition.Application/Services/AuthService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LaptopRequisition.Application/Services/RequestService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LaptopRequisition.Application/Services/RequestService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LaptopRequisition.Domain/Department.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LaptopRequisition.Domain/Department.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LaptopRequisition.Domain/Employee.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LaptopRequisition.Domain/Employee.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LaptopRequisition.Domain/Laptop.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LaptopRequisition.Domain/Laptop.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LaptopRequisition.Domain/Notification.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LaptopRequisition.Domain/Notification.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LaptopRequisition.Infrastructure/ApplicationDbContext.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LaptopRequisition.Infrastructure/ApplicationDbContext.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LaptopRequisition.Infrastructure/Repositories/DepartmentRepository.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LaptopRequisition.Infrastructure/Repositories/DepartmentRepository.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LaptopRequisition.Infrastructure/Repositories/EmployeeRepository.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LaptopRequisition.Infrastructure/Repositories/EmployeeRepository.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LaptopRequisition.Infrastructure/Repositories/LaptopRepository.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LaptopRequisition.Infrastructure/Repositories/LaptopRepository.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LaptopRequisition.Infrastructure/Repositories/NotificationRepository.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LaptopRequisition.Infrastructure/Repositories/NotificationRepository.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LaptopRequisition.Infrastructure/Repositories/PasswordResetTokenRepository.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LaptopRequisition.Infrastructure/Repositories/PasswordResetTokenRepository.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LaptopRequisition.Infrastructure/Repositories/RequestRepository.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LaptopRequisition.Infrastructure/Repositories/RequestRepository.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LaptopRequisition.Infrastructure/Repositories/ReturnRequestRepository.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LaptopRequisition.Infrastructure/Repositories/ReturnRequestRepository.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LaptopRequisition.Infrastructure/Services/EmailService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LaptopRequisition.Infrastructure/Services/EmailService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LaptopRequisition.Infrastructure/Services/JwtService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LaptopRequisition.Infrastructure/Services/JwtService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LaptopRequisition.WebAPI/Controllers/AuthController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LaptopRequisition.WebAPI/Controllers/AuthController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LaptopRequisition.WebAPI/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LaptopRequisition.WebAPI/Program.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -100,11 +63,23 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="EmbeddingIndexingInfo">
-    <option name="cachedIndexableFilesCount" value="44" />
+    <option name="cachedIndexableFilesCount" value="39" />
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;adebow&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/adebow/LaptopRequisitionBackend.git&quot;,
+    &quot;accountId&quot;: &quot;e96576c5-8ba1-4f90-85cf-dd619494a1de&quot;
+  }
+}</component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$PROJECT_DIR$/LaptopRequisition.Application/DTOs/AssignLaptopDto.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/LaptopRequisition.Application/DTOs/CreateLaptopDto.cs" root0="FORCE_HIGHLIGHTING" />
@@ -244,8 +219,18 @@
       <workItem from="1779351278650" duration="258000" />
       <workItem from="1779351933571" duration="22741000" />
       <workItem from="1779451396516" duration="2664000" />
-      <workItem from="1779454473127" duration="13237000" />
+      <workItem from="1779454473127" duration="18086000" />
+      <workItem from="1779532590820" duration="10597000" />
     </task>
+    <task id="LOCAL-00001" summary="Initial LaptopRequisition setup with user authentication">
+      <option name="closed" value="true" />
+      <created>1779469476642</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1779469476643</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
