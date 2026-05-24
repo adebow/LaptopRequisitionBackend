@@ -5,6 +5,7 @@ using LaptopRequisition.Domain.Enums;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 
+
 namespace LaptopRequisition.Application.Services
 {
     public class RequestService : IRequestService
@@ -14,19 +15,22 @@ namespace LaptopRequisition.Application.Services
         private readonly IEmployeeRepository _employeeRepository;
         private readonly ILaptopRepository _laptopRepository;
         private readonly INotificationService _notificationService;
+        private readonly IEmailService _emailService; 
 
         public RequestService(
             IRequestRepository requestRepository,
             IEmployeeRepository employeeRepository,
             ILaptopRepository laptopRepository,
             IHttpContextAccessor httpContextAccessor,
-            INotificationService notificationService)
+            INotificationService notificationService,
+            IEmailService emailService) 
         {
             _requestRepository = requestRepository;
             _employeeRepository = employeeRepository;
             _laptopRepository = laptopRepository;
             _httpContextAccessor = httpContextAccessor;
-            _notificationService = notificationService; 
+            _notificationService = notificationService;
+            _emailService = emailService; 
         }
         private Guid GetCurrentEmployeeId()
         {
@@ -63,7 +67,17 @@ namespace LaptopRequisition.Application.Services
 
             await _requestRepository.AddAsync(request);
             
+            var employee = await _employeeRepository.GetByIdAsync(employeeId);
+            if (employee == null)
+            {
+                throw new InvalidOperationException("Employee not found for current user.");
+            }
+            
             await _notificationService.CreateNotificationAsync(employeeId, $"Your laptop request (ID: {request.Id.ToString().Substring(0, 8)}...) has been submitted successfully.");
+            
+            var emailSubject = "Laptop Request Submitted Successfully";
+            var emailMessage = $"Dear {employee.FullName},\n\nYour laptop request with ID: {request.Id.ToString().Substring(0, 8)}... for '{request.Purpose}' has been submitted successfully and is now pending review.\n\nWe will notify you once there is an update.\n\nBest regards,\nLRS Team";
+            await _emailService.SendEmailAsync(employee.Email, emailSubject, emailMessage);
 
             return Map(request);
         }

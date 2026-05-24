@@ -4,19 +4,20 @@ using LaptopRequisition.Infrastructure;
 using LaptopRequisition.Infrastructure.Repositories;
 using LaptopRequisition.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authentication.JwtBearer; 
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using System.Text; 
+using System.Text;
 using Microsoft.OpenApi.Models;
 using System.Text.Json.Serialization;
-using LaptopRequisition.WebAPI.Middleware; 
+using LaptopRequisition.WebAPI.Middleware;
+using MySql.EntityFrameworkCore; 
 
 
 var builder = WebApplication.CreateBuilder(args);
 
 
 builder.Services.AddControllers()
-    .AddJsonOptions(options => 
+    .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
@@ -56,11 +57,11 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseMySQL(builder.Configuration.GetConnectionString("DefaultConnection"))); // Changed UseSqlServer to UseMySQL
 
 
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
-builder.Services.AddScoped<IDepartmentRepository, DepartmentRepository>(); 
+builder.Services.AddScoped<IDepartmentRepository, DepartmentRepository>();
 builder.Services.AddScoped<ILaptopRepository, LaptopRepository>();
 builder.Services.AddScoped<IRequestRepository, RequestRepository>();
 builder.Services.AddScoped<IReturnRequestRepository, ReturnRequestRepository>();
@@ -71,10 +72,15 @@ builder.Services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepo
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IDepartmentService, DepartmentService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
-builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IRequestService, RequestService>();
 builder.Services.AddScoped<ILaptopService, LaptopService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddTransient<IEmailService, EmailService>(); 
+
+
+
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -97,7 +103,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend",
         builder =>
         {
-            builder.WithOrigins("https://laptop-requisition-form.vercel.app/") 
+            builder.WithOrigins("https://laptop-requisition-form.vercel.app/")
                    .AllowAnyHeader()
                    .AllowAnyMethod();
         });
@@ -108,13 +114,13 @@ var app = builder.Build();
 
 
 app.UseHttpsRedirection();
-app.UseMiddleware<ExceptionHandlingMiddleware>(); 
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.UseCors("AllowFrontend"); 
+app.UseCors("AllowFrontend");
 
 app.UseAuthentication();
 app.UseAuthorization();

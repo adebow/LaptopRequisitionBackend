@@ -1,7 +1,8 @@
 ﻿using LaptopRequisition.Application.DTOs;
 using LaptopRequisition.Application.Interfaces;
 using LaptopRequisition.Domain;
-using System.Text.Json; 
+using System.Text.Json;
+
 
 namespace LaptopRequisition.Application.Services
 {
@@ -64,6 +65,9 @@ namespace LaptopRequisition.Application.Services
             };
 
             await _employeeRepository.AddAsync(employee);
+            
+            await _emailService.SendEmailAsync(employee.Email, "Welcome to Laptop Requisition System", $"Dear {employee.FullName},\n\nYour account has been successfully created. You can now log in to request laptops.\n\nBest regards,\nLRS Team");
+
             return employee;
         }
 
@@ -112,7 +116,7 @@ namespace LaptopRequisition.Application.Services
                 Id = Guid.NewGuid(),
                 EmployeeId = employee.Id,
                 Token = token,
-                ExpiresAt = DateTime.UtcNow.AddHours(1), 
+                ExpiresAt = DateTime.UtcNow.AddMinutes(30),
                 IsUsed = false
             };
 

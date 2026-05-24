@@ -1,5 +1,4 @@
 ﻿
-
 namespace LaptopRequisition.Application.Interfaces
 {
     public interface IEmailService

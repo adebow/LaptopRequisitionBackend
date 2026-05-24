@@ -8,60 +8,65 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace LaptopRequisition.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class InitialMySqlCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AlterDatabase()
+                .Annotation("MySQL:Charset", "utf8mb4");
+
             migrationBuilder.CreateTable(
                 name: "Departments",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    Id = table.Column<Guid>(type: "char(36)", nullable: false),
+                    Name = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Departments", x => x.Id);
-                });
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
 
             migrationBuilder.CreateTable(
                 name: "Laptops",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    SerialNumber = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Specifications = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    IsAssigned = table.Column<bool>(type: "bit", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    Id = table.Column<Guid>(type: "char(36)", nullable: false),
+                    Name = table.Column<string>(type: "longtext", nullable: false),
+                    SerialNumber = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false),
+                    Specifications = table.Column<string>(type: "longtext", nullable: false),
+                    IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    IsAssigned = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Laptops", x => x.Id);
-                });
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
 
             migrationBuilder.CreateTable(
                 name: "Employees",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    StaffId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    FullName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    DepartmentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Role = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Id = table.Column<Guid>(type: "char(36)", nullable: false),
+                    StaffId = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false),
+                    FullName = table.Column<string>(type: "longtext", nullable: false),
+                    Email = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false),
+                    PhoneNumber = table.Column<string>(type: "longtext", nullable: false),
+                    DepartmentId = table.Column<Guid>(type: "char(36)", nullable: false),
+                    Role = table.Column<string>(type: "longtext", nullable: false),
+                    PasswordHash = table.Column<string>(type: "longtext", nullable: false),
                     FailedLoginCount = table.Column<int>(type: "int", nullable: false),
-                    IsLocked = table.Column<bool>(type: "bit", nullable: false),
-                    PreviousPasswordHashes = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    IsLocked = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    PreviousPasswordHashes = table.Column<string>(type: "longtext", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -72,17 +77,18 @@ namespace LaptopRequisition.Infrastructure.Migrations
                         principalTable: "Departments",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                });
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
 
             migrationBuilder.CreateTable(
                 name: "Notifications",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    EmployeeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Message = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    IsRead = table.Column<bool>(type: "bit", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    Id = table.Column<Guid>(type: "char(36)", nullable: false),
+                    EmployeeId = table.Column<Guid>(type: "char(36)", nullable: false),
+                    Message = table.Column<string>(type: "longtext", nullable: false),
+                    IsRead = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -93,17 +99,18 @@ namespace LaptopRequisition.Infrastructure.Migrations
                         principalTable: "Employees",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                });
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
 
             migrationBuilder.CreateTable(
                 name: "PasswordResetTokens",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    EmployeeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Token = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    ExpiresAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    IsUsed = table.Column<bool>(type: "bit", nullable: false)
+                    Id = table.Column<Guid>(type: "char(36)", nullable: false),
+                    EmployeeId = table.Column<Guid>(type: "char(36)", nullable: false),
+                    Token = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false),
+                    ExpiresAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    IsUsed = table.Column<bool>(type: "tinyint(1)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -114,26 +121,27 @@ namespace LaptopRequisition.Infrastructure.Migrations
                         principalTable: "Employees",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                });
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
 
             migrationBuilder.CreateTable(
                 name: "Requests",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    EmployeeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    LaptopId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    IsSwapRequest = table.Column<bool>(type: "bit", nullable: false),
-                    Status = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Purpose = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PreferredSpecs = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    RejectionReason = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    IsReceiptConfirmed = table.Column<bool>(type: "bit", nullable: false),
-                    ReceiptConfirmedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ApprovedRejectedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    AssignedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    Id = table.Column<Guid>(type: "char(36)", nullable: false),
+                    EmployeeId = table.Column<Guid>(type: "char(36)", nullable: false),
+                    LaptopId = table.Column<Guid>(type: "char(36)", nullable: true),
+                    IsSwapRequest = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    Status = table.Column<string>(type: "varchar(255)", nullable: false),
+                    Purpose = table.Column<string>(type: "longtext", nullable: false),
+                    PreferredSpecs = table.Column<string>(type: "longtext", nullable: false),
+                    RejectionReason = table.Column<string>(type: "longtext", nullable: true),
+                    IsReceiptConfirmed = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    ReceiptConfirmedAt = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    ApprovedRejectedAt = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    AssignedAt = table.Column<DateTime>(type: "datetime(6)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -150,20 +158,21 @@ namespace LaptopRequisition.Infrastructure.Migrations
                         principalTable: "Laptops",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.SetNull);
-                });
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
 
             migrationBuilder.CreateTable(
                 name: "ReturnRequests",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    EmployeeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    LaptopId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Reason = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ReturnedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    Id = table.Column<Guid>(type: "char(36)", nullable: false),
+                    EmployeeId = table.Column<Guid>(type: "char(36)", nullable: false),
+                    LaptopId = table.Column<Guid>(type: "char(36)", nullable: false),
+                    Reason = table.Column<string>(type: "longtext", nullable: false),
+                    Status = table.Column<string>(type: "longtext", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    ReturnedAt = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -180,18 +189,19 @@ namespace LaptopRequisition.Infrastructure.Migrations
                         principalTable: "Laptops",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                });
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
 
             migrationBuilder.InsertData(
                 table: "Departments",
                 columns: new[] { "Id", "CreatedAt", "Name", "UpdatedAt" },
                 values: new object[,]
                 {
-                    { new Guid("11111111-1111-1111-1111-111111111111"), new DateTime(2026, 5, 22, 16, 56, 54, 342, DateTimeKind.Utc).AddTicks(969), "Human Resources", new DateTime(2026, 5, 22, 16, 56, 54, 342, DateTimeKind.Utc).AddTicks(971) },
-                    { new Guid("22222222-2222-2222-2222-222222222222"), new DateTime(2026, 5, 22, 16, 56, 54, 342, DateTimeKind.Utc).AddTicks(975), "Management", new DateTime(2026, 5, 22, 16, 56, 54, 342, DateTimeKind.Utc).AddTicks(975) },
-                    { new Guid("33333333-3333-3333-3333-333333333333"), new DateTime(2026, 5, 22, 16, 56, 54, 342, DateTimeKind.Utc).AddTicks(980), "Finance", new DateTime(2026, 5, 22, 16, 56, 54, 342, DateTimeKind.Utc).AddTicks(981) },
-                    { new Guid("44444444-4444-4444-4444-444444444444"), new DateTime(2026, 5, 22, 16, 56, 54, 342, DateTimeKind.Utc).AddTicks(983), "Corporate Communications", new DateTime(2026, 5, 22, 16, 56, 54, 342, DateTimeKind.Utc).AddTicks(984) },
-                    { new Guid("55555555-5555-5555-5555-555555555555"), new DateTime(2026, 5, 22, 16, 56, 54, 342, DateTimeKind.Utc).AddTicks(986), "IT", new DateTime(2026, 5, 22, 16, 56, 54, 342, DateTimeKind.Utc).AddTicks(986) }
+                    { new Guid("11111111-1111-1111-1111-111111111111"), new DateTime(2026, 5, 24, 13, 49, 38, 839, DateTimeKind.Utc).AddTicks(9253), "Human Resources", new DateTime(2026, 5, 24, 13, 49, 38, 839, DateTimeKind.Utc).AddTicks(9256) },
+                    { new Guid("22222222-2222-2222-2222-222222222222"), new DateTime(2026, 5, 24, 13, 49, 38, 839, DateTimeKind.Utc).AddTicks(9260), "Management", new DateTime(2026, 5, 24, 13, 49, 38, 839, DateTimeKind.Utc).AddTicks(9261) },
+                    { new Guid("33333333-3333-3333-3333-333333333333"), new DateTime(2026, 5, 24, 13, 49, 38, 839, DateTimeKind.Utc).AddTicks(9267), "Finance", new DateTime(2026, 5, 24, 13, 49, 38, 839, DateTimeKind.Utc).AddTicks(9267) },
+                    { new Guid("44444444-4444-4444-4444-444444444444"), new DateTime(2026, 5, 24, 13, 49, 38, 839, DateTimeKind.Utc).AddTicks(9271), "Corporate Communications", new DateTime(2026, 5, 24, 13, 49, 38, 839, DateTimeKind.Utc).AddTicks(9272) },
+                    { new Guid("55555555-5555-5555-5555-555555555555"), new DateTime(2026, 5, 24, 13, 49, 38, 839, DateTimeKind.Utc).AddTicks(9274), "IT", new DateTime(2026, 5, 24, 13, 49, 38, 839, DateTimeKind.Utc).AddTicks(9275) }
                 });
 
             migrationBuilder.CreateIndex(

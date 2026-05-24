@@ -25,7 +25,9 @@ namespace LaptopRequisition.Infrastructure
            
             modelBuilder.Entity<Employee>(entity =>
             {
+                entity.Property(e => e.StaffId).HasMaxLength(255); 
                 entity.HasIndex(e => e.StaffId).IsUnique();
+                entity.Property(e => e.Email).HasMaxLength(255); 
                 entity.HasIndex(e => e.Email).IsUnique();
                 
                 entity.HasOne(e => e.Department)
@@ -40,6 +42,7 @@ namespace LaptopRequisition.Infrastructure
                       .WithOne(e => e.Department)
                       .HasForeignKey(e => e.DepartmentId);
                 
+                entity.Property(d => d.Name).HasMaxLength(255);
                 entity.HasIndex(d => d.Name).IsUnique();
 
                 entity.HasData(
@@ -83,6 +86,7 @@ namespace LaptopRequisition.Infrastructure
             
             modelBuilder.Entity<Laptop>(entity =>
             {
+                entity.Property(l => l.SerialNumber).HasMaxLength(255); 
                 entity.HasIndex(l => l.SerialNumber).IsUnique();
             });
 
@@ -123,6 +127,7 @@ namespace LaptopRequisition.Infrastructure
             
             modelBuilder.Entity<PasswordResetToken>(entity =>
             {
+                entity.Property(prt => prt.Token).HasMaxLength(255); // Added
                 entity.HasIndex(prt => prt.Token).IsUnique();
                 entity.HasOne(prt => prt.Employee)
                       .WithMany(e => e.PasswordResetTokens)
