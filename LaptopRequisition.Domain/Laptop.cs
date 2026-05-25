@@ -8,6 +8,8 @@
         public string Specifications { get; set; }
         public bool IsActive { get; set; }
         public bool IsAssigned { get; set; }
+        
+        public Guid? AssignedToEmployeeId { get; set; }
         public DateTime CreatedAt { get; set; } 
         public DateTime UpdatedAt { get; set; } 
 

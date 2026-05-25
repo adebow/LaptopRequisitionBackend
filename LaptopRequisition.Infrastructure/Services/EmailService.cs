@@ -19,6 +19,7 @@ namespace LaptopRequisition.Infrastructure.Services
         {
             using (var client = new SmtpClient(_emailSettings.SmtpHost, _emailSettings.SmtpPort))
             {
+                client.UseDefaultCredentials = false;
                 client.EnableSsl = _emailSettings.EnableSsl;
                 client.Credentials = new NetworkCredential(_emailSettings.SmtpUser, _emailSettings.SmtpPass);
 

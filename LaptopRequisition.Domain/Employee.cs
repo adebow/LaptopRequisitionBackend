@@ -8,7 +8,7 @@
         public string Email { get; set; }
         public string PhoneNumber { get; set; }
         public Guid DepartmentId { get; set; } 
-        public String Role { get; set; }       
+        public string Role { get; set; }       
         public string PasswordHash { get; set; }
         public int FailedLoginCount { get; set; }
         public bool IsLocked { get; set; }

@@ -47,37 +47,37 @@ namespace LaptopRequisition.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("11111111-1111-1111-1111-111111111111"),
-                            CreatedAt = new DateTime(2026, 5, 24, 13, 49, 38, 839, DateTimeKind.Utc).AddTicks(9253),
+                            CreatedAt = new DateTime(2026, 5, 24, 23, 49, 5, 647, DateTimeKind.Utc).AddTicks(5212),
                             Name = "Human Resources",
-                            UpdatedAt = new DateTime(2026, 5, 24, 13, 49, 38, 839, DateTimeKind.Utc).AddTicks(9256)
+                            UpdatedAt = new DateTime(2026, 5, 24, 23, 49, 5, 647, DateTimeKind.Utc).AddTicks(5215)
                         },
                         new
                         {
                             Id = new Guid("22222222-2222-2222-2222-222222222222"),
-                            CreatedAt = new DateTime(2026, 5, 24, 13, 49, 38, 839, DateTimeKind.Utc).AddTicks(9260),
+                            CreatedAt = new DateTime(2026, 5, 24, 23, 49, 5, 647, DateTimeKind.Utc).AddTicks(5222),
                             Name = "Management",
-                            UpdatedAt = new DateTime(2026, 5, 24, 13, 49, 38, 839, DateTimeKind.Utc).AddTicks(9261)
+                            UpdatedAt = new DateTime(2026, 5, 24, 23, 49, 5, 647, DateTimeKind.Utc).AddTicks(5223)
                         },
                         new
                         {
                             Id = new Guid("33333333-3333-3333-3333-333333333333"),
-                            CreatedAt = new DateTime(2026, 5, 24, 13, 49, 38, 839, DateTimeKind.Utc).AddTicks(9267),
+                            CreatedAt = new DateTime(2026, 5, 24, 23, 49, 5, 647, DateTimeKind.Utc).AddTicks(5225),
                             Name = "Finance",
-                            UpdatedAt = new DateTime(2026, 5, 24, 13, 49, 38, 839, DateTimeKind.Utc).AddTicks(9267)
+                            UpdatedAt = new DateTime(2026, 5, 24, 23, 49, 5, 647, DateTimeKind.Utc).AddTicks(5226)
                         },
                         new
                         {
                             Id = new Guid("44444444-4444-4444-4444-444444444444"),
-                            CreatedAt = new DateTime(2026, 5, 24, 13, 49, 38, 839, DateTimeKind.Utc).AddTicks(9271),
+                            CreatedAt = new DateTime(2026, 5, 24, 23, 49, 5, 647, DateTimeKind.Utc).AddTicks(5228),
                             Name = "Corporate Communications",
-                            UpdatedAt = new DateTime(2026, 5, 24, 13, 49, 38, 839, DateTimeKind.Utc).AddTicks(9272)
+                            UpdatedAt = new DateTime(2026, 5, 24, 23, 49, 5, 647, DateTimeKind.Utc).AddTicks(5229)
                         },
                         new
                         {
                             Id = new Guid("55555555-5555-5555-5555-555555555555"),
-                            CreatedAt = new DateTime(2026, 5, 24, 13, 49, 38, 839, DateTimeKind.Utc).AddTicks(9274),
+                            CreatedAt = new DateTime(2026, 5, 24, 23, 49, 5, 647, DateTimeKind.Utc).AddTicks(5231),
                             Name = "IT",
-                            UpdatedAt = new DateTime(2026, 5, 24, 13, 49, 38, 839, DateTimeKind.Utc).AddTicks(9275)
+                            UpdatedAt = new DateTime(2026, 5, 24, 23, 49, 5, 647, DateTimeKind.Utc).AddTicks(5232)
                         });
                 });
 
@@ -149,6 +149,9 @@ namespace LaptopRequisition.Infrastructure.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid?>("AssignedToEmployeeId")
                         .HasColumnType("char(36)");
 
                     b.Property<DateTime>("CreatedAt")

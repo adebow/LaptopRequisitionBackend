@@ -1,8 +1,13 @@
 ﻿using LaptopRequisition.Application.DTOs;
+using LaptopRequisition.Application.DTOs.SSO;
 using LaptopRequisition.Application.Interfaces;
+using LaptopRequisition.Application.Interfaces.SSO;
 using LaptopRequisition.Domain;
+using LaptopRequisition.Application.Configurations;
+using Microsoft.Extensions.Options;
 using System.Text.Json;
-
+using Refit;
+using BCrypt.Net; 
 
 namespace LaptopRequisition.Application.Services
 {
@@ -13,18 +18,24 @@ namespace LaptopRequisition.Application.Services
         private readonly IPasswordResetTokenRepository _passwordResetTokenRepository;
         private readonly IEmailService _emailService;
         private readonly IDepartmentRepository _departmentRepository;
+        private readonly ISsoClient _ssoClient;
+        private readonly SsoSettings _ssoSettings;
 
         public AuthService(IEmployeeRepository employeeRepository,
                            IJwtService jwtService,
                            IPasswordResetTokenRepository passwordResetTokenRepository,
                            IEmailService emailService,
-                           IDepartmentRepository departmentRepository)
+                           IDepartmentRepository departmentRepository,
+                           ISsoClient ssoClient,
+                           IOptions<SsoSettings> ssoSettingsOptions)
         {
             _employeeRepository = employeeRepository;
             _jwtService = jwtService;
             _passwordResetTokenRepository = passwordResetTokenRepository;
             _emailService = emailService;
             _departmentRepository = departmentRepository;
+            _ssoClient = ssoClient;
+            _ssoSettings = ssoSettingsOptions.Value;
         }
 
         public async Task<Employee> RegisterEmployeeAsync(RegisterEmployeeDto registerDto)
@@ -46,22 +57,50 @@ namespace LaptopRequisition.Application.Services
             {
                 throw new InvalidOperationException($"Department with ID '{registerDto.DepartmentId}' not found."); 
             }
-            
-            string passwordHash = BCrypt.Net.BCrypt.HashPassword(registerDto.Password);
 
+            // Generate a new GUID for the employee (which will be used as SSO username/sourceId)
+            var newEmployeeId = Guid.NewGuid();
+
+            // 1. Register user in SSO system
+            var ssoUserRequest = new SsoUserCreationRequestDto
+            {
+                Username = newEmployeeId.ToString(), // Use employee ID as SSO username
+                Password = registerDto.Password,
+                Email = registerDto.Email,
+                SourceId = newEmployeeId.ToString() // Use employee ID as SourceId
+            };
+
+            try
+            {
+                var ssoResponse = await _ssoClient.CreateSsoUser(_ssoSettings.ClientId, ssoUserRequest);
+                if (!ssoResponse.IsSuccess)
+                {
+                    throw new InvalidOperationException($"SSO user creation failed: {ssoResponse.Message ?? "Unknown error"}");
+                }
+            }
+            catch (ApiException ex)
+            {
+                
+                throw new InvalidOperationException($"Failed to create user in SSO system. Status: {ex.StatusCode}. Message: {ex.Content}", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"An unexpected error occurred during SSO user creation: {ex.Message}", ex);
+            }
+            
             var employee = new Employee
             {
-                Id = Guid.NewGuid(),
+                Id = newEmployeeId, 
                 StaffId = registerDto.StaffId,
                 FullName = registerDto.FullName,
                 Email = registerDto.Email,
                 PhoneNumber = registerDto.PhoneNumber,
                 DepartmentId = registerDto.DepartmentId, 
                 Role = registerDto.Role, 
-                PasswordHash = passwordHash,
+                PasswordHash = string.Empty,
                 FailedLoginCount = 0,
                 IsLocked = false,
-                PreviousPasswordHashes = JsonSerializer.Serialize(new List<string> { passwordHash }) 
+                PreviousPasswordHashes = JsonSerializer.Serialize(new List<string>()) // No local password history
             };
 
             await _employeeRepository.AddAsync(employee);
@@ -71,7 +110,7 @@ namespace LaptopRequisition.Application.Services
             return employee;
         }
 
-        public async Task<string> LoginAsync(string email, string password)
+        public async Task<LoginResponseDto> LoginAsync(string email, string password) 
         {
             var employee = await _employeeRepository.GetByEmailAsync(email);
 
@@ -79,27 +118,60 @@ namespace LaptopRequisition.Application.Services
             {
                 throw new UnauthorizedAccessException("Invalid credentials.");
             }
-
+            
             if (employee.IsLocked)
             {
                 throw new UnauthorizedAccessException("Account is locked. Please contact support.");
             }
-
-            if (!BCrypt.Net.BCrypt.Verify(password, employee.PasswordHash))
+            
+            var ssoTokenRequest = new SsoTokenRequestDto
             {
-                employee.FailedLoginCount++;
-                if (employee.FailedLoginCount >= 5)
+                ClientId = _ssoSettings.ClientId,
+                ClientSecret = _ssoSettings.ClientSecret,
+                Username = employee.Id.ToString(),
+                Password = password
+            };
+
+            SsoTokenResponseDto ssoTokenResponse;
+            try
+            {
+                ssoTokenResponse = await _ssoClient.GetSsoToken(ssoTokenRequest);
+            }
+            catch (ApiException ex)
+            {
+                // Handle Refit API errors (e.g., invalid credentials, network issues)
+                // For invalid credentials, SSO might return 400 Bad Request
+                if (ex.StatusCode == System.Net.HttpStatusCode.BadRequest)
                 {
-                    employee.IsLocked = true;
+                    // Increment failed login count for local employee if SSO rejects
+                    employee.FailedLoginCount++;
+                    if (employee.FailedLoginCount >= 5)
+                    {
+                        employee.IsLocked = true;
+                    }
+                    await _employeeRepository.UpdateAsync(employee);
+                    throw new UnauthorizedAccessException("Invalid credentials.");
                 }
-                await _employeeRepository.UpdateAsync(employee);
-                throw new UnauthorizedAccessException("Invalid credentials.");
+                throw new UnauthorizedAccessException($"Failed to authenticate with SSO system. Status: {ex.StatusCode}. Message: {ex.Content}", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new UnauthorizedAccessException($"An unexpected error occurred during SSO authentication: {ex.Message}", ex);
             }
             
             employee.FailedLoginCount = 0;
-            await _employeeRepository.UpdateAsync(employee);
+            await _employeeRepository.UpdateAsync(employee); 
+
             
-            return _jwtService.GenerateToken(employee);
+            var localJwtToken = _jwtService.GenerateToken(employee);
+            
+            var employeeDto = MapEmployeeToDto(employee);
+
+            return new LoginResponseDto
+            {
+                TokenDetails = ssoTokenResponse,
+                EmployeeDetails = employeeDto 
+            };
         }
 
         public async Task<bool> RequestPasswordResetAsync(string email)
@@ -107,7 +179,12 @@ namespace LaptopRequisition.Application.Services
             var employee = await _employeeRepository.GetByEmailAsync(email);
             if (employee == null)
             {
-                return true;
+                return true; 
+            }
+
+            if (employee.PasswordHash == string.Empty) 
+            {
+                throw new InvalidOperationException("Password reset for this account is managed by the SSO system. Please use the SSO portal's password reset functionality.");
             }
 
             var token = Guid.NewGuid().ToString();
@@ -142,6 +219,11 @@ namespace LaptopRequisition.Application.Services
             {
                 throw new InvalidOperationException("Employee not found for the given token.");
             }
+
+            if (employee.PasswordHash == string.Empty)
+            {
+                throw new InvalidOperationException("Password reset for this account is managed by the SSO system. Please use the SSO portal's password reset functionality.");
+            }
             
             var previousHashes = JsonSerializer.Deserialize<List<string>>(employee.PreviousPasswordHashes)
                                  ?? new List<string>(); 
@@ -153,7 +235,6 @@ namespace LaptopRequisition.Application.Services
                 }
             }
 
-           
             string newPasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
             
             previousHashes.Add(newPasswordHash);
@@ -183,6 +264,11 @@ namespace LaptopRequisition.Application.Services
                 throw new InvalidOperationException("Employee not found.");
             }
             
+            if (employee.PasswordHash == string.Empty)
+            {
+                throw new InvalidOperationException("Password change for this account is managed by the SSO system. Please use the SSO portal's password change functionality.");
+            }
+
             if (!BCrypt.Net.BCrypt.Verify(currentPassword, employee.PasswordHash))
             {
                 throw new UnauthorizedAccessException("Incorrect current password.");
@@ -199,7 +285,6 @@ namespace LaptopRequisition.Application.Services
             }
             
             string newPasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
-            
             previousHashes.Add(newPasswordHash);
             if (previousHashes.Count > 3)
             {
@@ -214,6 +299,24 @@ namespace LaptopRequisition.Application.Services
             await _employeeRepository.UpdateAsync(employee);
 
             return true;
+        }
+
+        private EmployeeDto MapEmployeeToDto(Employee employee)
+        {
+            var department = _departmentRepository.GetByIdAsync(employee.DepartmentId).Result;
+            
+            return new EmployeeDto
+            {
+                Id = employee.Id,
+                StaffId = employee.StaffId,
+                FullName = employee.FullName,
+                Email = employee.Email,
+                PhoneNumber = employee.PhoneNumber,
+                DepartmentId = employee.DepartmentId,
+                DepartmentName = department?.Name ?? "Unknown",
+                Role = employee.Role,
+                IsLocked = employee.IsLocked
+            };
         }
     }
 }

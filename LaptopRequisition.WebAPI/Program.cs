@@ -1,5 +1,6 @@
 using LaptopRequisition.Application.Interfaces;
 using LaptopRequisition.Application.Services;
+using LaptopRequisition.Application.Configurations;
 using LaptopRequisition.Infrastructure;
 using LaptopRequisition.Infrastructure.Repositories;
 using LaptopRequisition.Infrastructure.Services;
@@ -10,7 +11,9 @@ using System.Text;
 using Microsoft.OpenApi.Models;
 using System.Text.Json.Serialization;
 using LaptopRequisition.WebAPI.Middleware;
-using MySql.EntityFrameworkCore; 
+using MySql.EntityFrameworkCore;
+using Refit; // Added this line
+using LaptopRequisition.Application.Interfaces.SSO; // Added this line
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -57,7 +60,7 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseMySQL(builder.Configuration.GetConnectionString("DefaultConnection"))); // Changed UseSqlServer to UseMySQL
+    options.UseMySQL(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
@@ -75,11 +78,24 @@ builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IRequestService, RequestService>();
 builder.Services.AddScoped<ILaptopService, LaptopService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
-builder.Services.AddTransient<IEmailService, EmailService>(); 
+builder.Services.AddScoped<IReturnRequestService, ReturnRequestService>();
+builder.Services.AddTransient<IEmailService, EmailService>();
 
 
 
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+
+
+builder.Services.Configure<SsoSettings>(builder.Configuration.GetSection("SsoSettings")); // Added this line
+
+
+builder.Services
+    .AddRefitClient<ISsoClient>()
+    .ConfigureHttpClient((serviceProvider, client) =>
+    {
+        var ssoSettings = serviceProvider.GetRequiredService<Microsoft.Extensions.Options.IOptions<SsoSettings>>().Value;
+        client.BaseAddress = new Uri(ssoSettings.BaseUrl);
+    }); 
 
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -103,7 +119,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend",
         builder =>
         {
-            builder.WithOrigins("https://laptop-requisition-form.vercel.app/")
+            builder.WithOrigins("https://laptop-requisition-form.vercel.app")
                    .AllowAnyHeader()
                    .AllowAnyMethod();
         });
@@ -120,7 +136,11 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.UseCors("AllowFrontend");
+app.UseCors(x => x
+    .SetIsOriginAllowed(origin => true)
+    .AllowAnyMethod()
+    .AllowAnyHeader()
+    .AllowCredentials()); 
 
 app.UseAuthentication();
 app.UseAuthorization();

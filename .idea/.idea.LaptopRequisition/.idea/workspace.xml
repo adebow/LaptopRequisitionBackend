@@ -17,17 +17,31 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="237f1c0c-269e-4622-97e1-8938830e4738" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Infrastructure/Services/EmailSettings.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/Configurations/SsoSettings.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/DTOs/CreateReturnRequestDto.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/DTOs/EmployeeDto.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/DTOs/LoginResponseDto.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/DTOs/ReturnRequestResponseDto.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/DTOs/SSO/SsoTokenRequestDto.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/DTOs/SSO/SsoTokenResponseDto.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/DTOs/SSO/SsoUserCreationRequestDto.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/DTOs/SSO/SsoUserCreationResponseDto.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/Interfaces/IReturnRequestService.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/Interfaces/SSO/ISsoClient.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Application/Services/ReturnRequestService.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/LaptopRequisition.Domain/Enums/ReturnRequestStatus.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/LaptopRequisition.WebAPI/Controllers/ReturnRequestsController.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.LaptopRequisition/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.LaptopRequisition/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/LaptopRequisition.Application/Interfaces/IEmailService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LaptopRequisition.Application/Interfaces/IEmailService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LaptopRequisition.Application/Interfaces/IAuthService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LaptopRequisition.Application/Interfaces/IAuthService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LaptopRequisition.Application/Interfaces/IReturnRequestRepository.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LaptopRequisition.Application/Interfaces/IReturnRequestRepository.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LaptopRequisition.Application/LaptopRequisition.Application.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/LaptopRequisition.Application/LaptopRequisition.Application.csproj" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/LaptopRequisition.Application/Services/AuthService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LaptopRequisition.Application/Services/AuthService.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/LaptopRequisition.Application/Services/RequestService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LaptopRequisition.Application/Services/RequestService.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/LaptopRequisition.Infrastructure/ApplicationDbContext.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LaptopRequisition.Infrastructure/ApplicationDbContext.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/LaptopRequisition.Infrastructure/LaptopRequisition.Infrastructure.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/LaptopRequisition.Infrastructure/LaptopRequisition.Infrastructure.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/LaptopRequisition.Infrastructure/Migrations/20260522165656_InitialCreate.Designer.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/LaptopRequisition.Infrastructure/Migrations/20260522165656_InitialCreate.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/LaptopRequisition.Infrastructure/Migrations/ApplicationDbContextModelSnapshot.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/LaptopRequisition.Domain/Employee.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LaptopRequisition.Domain/Employee.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LaptopRequisition.Domain/Laptop.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LaptopRequisition.Domain/Laptop.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LaptopRequisition.Infrastructure/Migrations/ApplicationDbContextModelSnapshot.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LaptopRequisition.Infrastructure/Migrations/ApplicationDbContextModelSnapshot.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LaptopRequisition.Infrastructure/Repositories/ReturnRequestRepository.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LaptopRequisition.Infrastructure/Repositories/ReturnRequestRepository.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/LaptopRequisition.Infrastructure/Services/EmailService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LaptopRequisition.Infrastructure/Services/EmailService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LaptopRequisition.WebAPI/LaptopRequisition.WebAPI.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/LaptopRequisition.WebAPI/LaptopRequisition.WebAPI.csproj" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/LaptopRequisition.WebAPI/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LaptopRequisition.WebAPI/Program.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/LaptopRequisition.WebAPI/appsettings.Development.json" beforeDir="false" afterPath="$PROJECT_DIR$/LaptopRequisition.WebAPI/appsettings.Development.json" afterDir="false" />
     </list>
@@ -37,7 +51,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="EmbeddingIndexingInfo">
-    <option name="cachedIndexableFilesCount" value="42" />
+    <option name="cachedIndexableFilesCount" value="53" />
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -196,7 +210,9 @@
       <workItem from="1779454473127" duration="18086000" />
       <workItem from="1779532590820" duration="12717000" />
       <workItem from="1779549713464" duration="8257000" />
-      <workItem from="1779626308031" duration="8075000" />
+      <workItem from="1779626308031" duration="25057000" />
+      <workItem from="1779659971760" duration="6433000" />
+      <workItem from="1779692703067" duration="9899000" />
     </task>
     <task id="LOCAL-00001" summary="Initial LaptopRequisition setup with user authentication">
       <option name="closed" value="true" />
@@ -214,7 +230,15 @@
       <option name="project" value="LOCAL" />
       <updated>1779547405098</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="Integrated email service and changed database from sql server to mysql">
+      <option name="closed" value="true" />
+      <created>1779638970746</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1779638970746</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -227,7 +251,8 @@
     <MESSAGE value="Initial LaptopRequisition Setup" />
     <MESSAGE value="Initial LaptopRequisition setup with user authentication" />
     <MESSAGE value="reduced boiler plate codes and integrated notification" />
-    <option name="LAST_COMMIT_MESSAGE" value="reduced boiler plate codes and integrated notification" />
+    <MESSAGE value="Integrated email service and changed database from sql server to mysql" />
+    <option name="LAST_COMMIT_MESSAGE" value="Integrated email service and changed database from sql server to mysql" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
