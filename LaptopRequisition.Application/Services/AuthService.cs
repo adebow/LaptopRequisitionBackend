@@ -1,13 +1,22 @@
 ﻿using LaptopRequisition.Application.DTOs;
+using LaptopRequisition.Application.DTOs.Notification;
 using LaptopRequisition.Application.DTOs.SSO;
+using LaptopRequisition.Application.Helpers;
 using LaptopRequisition.Application.Interfaces;
+using LaptopRequisition.Application.Interfaces.External;
 using LaptopRequisition.Application.Interfaces.SSO;
 using LaptopRequisition.Domain;
-using LaptopRequisition.Application.Configurations;
+using LaptopRequisition.Domain.Enums;
+using LaptopRequisition.Application.Configurations; // Added for all settings
 using Microsoft.Extensions.Options;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Text.Json;
+using System.Threading.Tasks;
 using Refit;
-using BCrypt.Net; 
+using LaptopRequisition.Application.DTOs.Login; // Added for LoginResponseDto
 
 namespace LaptopRequisition.Application.Services
 {
@@ -16,26 +25,38 @@ namespace LaptopRequisition.Application.Services
         private readonly IEmployeeRepository _employeeRepository;
         private readonly IJwtService _jwtService;
         private readonly IPasswordResetTokenRepository _passwordResetTokenRepository;
-        private readonly IEmailService _emailService;
         private readonly IDepartmentRepository _departmentRepository;
         private readonly ISsoClient _ssoClient;
         private readonly SsoSettings _ssoSettings;
+        private readonly IOtpHelperService _otpHelperService;
+        private readonly INotificationApi _notificationApi;
+        private readonly NotificationApiSettings _notificationApiSettings;
+        private readonly IRoleRepository _roleRepository;
+        private readonly AuthSettings _authSettings; // Added
 
         public AuthService(IEmployeeRepository employeeRepository,
                            IJwtService jwtService,
                            IPasswordResetTokenRepository passwordResetTokenRepository,
-                           IEmailService emailService,
                            IDepartmentRepository departmentRepository,
                            ISsoClient ssoClient,
-                           IOptions<SsoSettings> ssoSettingsOptions)
+                           IOptions<SsoSettings> ssoSettingsOptions,
+                           IOtpHelperService otpHelperService,
+                           INotificationApi notificationApi,
+                           IOptions<NotificationApiSettings> notificationApiSettingsOptions,
+                           IRoleRepository roleRepository,
+                           IOptions<AuthSettings> authSettingsOptions) // Added
         {
             _employeeRepository = employeeRepository;
             _jwtService = jwtService;
             _passwordResetTokenRepository = passwordResetTokenRepository;
-            _emailService = emailService;
             _departmentRepository = departmentRepository;
             _ssoClient = ssoClient;
             _ssoSettings = ssoSettingsOptions.Value;
+            _otpHelperService = otpHelperService;
+            _notificationApi = notificationApi;
+            _notificationApiSettings = notificationApiSettingsOptions.Value;
+            _roleRepository = roleRepository;
+            _authSettings = authSettingsOptions.Value; // Initialized
         }
 
         public async Task<Employee> RegisterEmployeeAsync(RegisterEmployeeDto registerDto)
@@ -58,16 +79,21 @@ namespace LaptopRequisition.Application.Services
                 throw new InvalidOperationException($"Department with ID '{registerDto.DepartmentId}' not found."); 
             }
 
-            // Generate a new GUID for the employee (which will be used as SSO username/sourceId)
+            // Fetch the default "Employee" role ID
+            var employeeRole = await _roleRepository.GetByNameAsync("Employee");
+            if (employeeRole == null)
+            {
+                throw new InvalidOperationException("Default 'Employee' role not found. Please ensure roles are seeded.");
+            }
+         
             var newEmployeeId = Guid.NewGuid();
-
-            // 1. Register user in SSO system
+            
             var ssoUserRequest = new SsoUserCreationRequestDto
             {
-                Username = newEmployeeId.ToString(), // Use employee ID as SSO username
+                Username = newEmployeeId.ToString(), 
                 Password = registerDto.Password,
                 Email = registerDto.Email,
-                SourceId = newEmployeeId.ToString() // Use employee ID as SourceId
+                SourceId = newEmployeeId.ToString() 
             };
 
             try
@@ -80,7 +106,6 @@ namespace LaptopRequisition.Application.Services
             }
             catch (ApiException ex)
             {
-                
                 throw new InvalidOperationException($"Failed to create user in SSO system. Status: {ex.StatusCode}. Message: {ex.Content}", ex);
             }
             catch (Exception ex)
@@ -96,39 +121,64 @@ namespace LaptopRequisition.Application.Services
                 Email = registerDto.Email,
                 PhoneNumber = registerDto.PhoneNumber,
                 DepartmentId = registerDto.DepartmentId, 
-                Role = registerDto.Role, 
-                PasswordHash = string.Empty,
+                RoleId = employeeRole.Id, // Assign the default Employee RoleId
+                PasswordHash = string.Empty, // Password is managed by SSO
                 FailedLoginCount = 0,
                 IsLocked = false,
-                PreviousPasswordHashes = JsonSerializer.Serialize(new List<string>()) // No local password history
+                PreviousPasswordHashes = JsonSerializer.Serialize(new List<string>()),
+                IsVerified = false // Account is unverified until OTP is confirmed
             };
 
             await _employeeRepository.AddAsync(employee);
             
-            await _emailService.SendEmailAsync(employee.Email, "Welcome to Laptop Requisition System", $"Dear {employee.FullName},\n\nYour account has been successfully created. You can now log in to request laptops.\n\nBest regards,\nLRS Team");
-
             return employee;
         }
 
-        public async Task<LoginResponseDto> LoginAsync(string email, string password) 
+        public async Task<LoginResponseDto> LoginAsync(string email, string password)
         {
-            var employee = await _employeeRepository.GetByEmailAsync(email);
+            var response = new LoginResponseDto { IsSuccess = false };
+            var employee = await _employeeRepository.GetByEmailWithDepartmentAndRoleAsync(email);
 
             if (employee == null)
             {
-                throw new UnauthorizedAccessException("Invalid credentials.");
+                response.Message = "Invalid credentials.";
+                return response;
             }
-            
+
+            response.EmployeeDetails = MapEmployeeToDto(employee);
+            response.IsFirstLogin = employee.IsFirstLogin;
+            response.IsAdmin = (employee.Role?.Name == "Admin"); // Determine if admin
+
             if (employee.IsLocked)
             {
-                throw new UnauthorizedAccessException("Account is locked. Please contact support.");
+                if (employee.LockoutEndDate.HasValue && employee.LockoutEndDate > DateTime.UtcNow)
+                {
+                    response.Message = $"Account is locked. Try again after {employee.LockoutEndDate.Value.ToLocalTime()}.";
+                    response.IsLocked = true;
+                    response.LockoutEndDate = employee.LockoutEndDate;
+                    return response;
+                }
+                else
+                {
+                    // Lockout period expired, reset lockout
+                    employee.IsLocked = false;
+                    employee.FailedLoginCount = 0;
+                    employee.LockoutEndDate = null;
+                    await _employeeRepository.UpdateLoginAttemptsAsync(employee); // Use new method
+                }
+            }
+
+            if (!employee.IsVerified)
+            {
+                response.Message = "Account not verified. Please verify your account first.";
+                return response;
             }
             
             var ssoTokenRequest = new SsoTokenRequestDto
             {
                 ClientId = _ssoSettings.ClientId,
                 ClientSecret = _ssoSettings.ClientSecret,
-                Username = employee.Id.ToString(),
+                Username = employee.Id.ToString(), 
                 Password = password
             };
 
@@ -136,53 +186,131 @@ namespace LaptopRequisition.Application.Services
             try
             {
                 ssoTokenResponse = await _ssoClient.GetSsoToken(ssoTokenRequest);
+                response.TokenDetails = ssoTokenResponse;
+                response.IsSuccess = true;
+                response.Message = "Login successful.";
+
+                // Reset failed login attempts on successful login
+                if (employee.FailedLoginCount > 0 || employee.IsLocked)
+                {
+                    employee.FailedLoginCount = 0;
+                    employee.IsLocked = false;
+                    employee.LockoutEndDate = null;
+                    await _employeeRepository.UpdateLoginAttemptsAsync(employee); // Use new method
+                }
             }
             catch (ApiException ex)
             {
-                // Handle Refit API errors (e.g., invalid credentials, network issues)
-                // For invalid credentials, SSO might return 400 Bad Request
                 if (ex.StatusCode == System.Net.HttpStatusCode.BadRequest)
                 {
-                    // Increment failed login count for local employee if SSO rejects
                     employee.FailedLoginCount++;
-                    if (employee.FailedLoginCount >= 5)
+                    // Update response with current count (though not directly used in DTO, good for debugging)
+                    // response.FailedLoginCount = employee.FailedLoginCount; 
+
+                    if (employee.FailedLoginCount >= _authSettings.MaxFailedLoginAttempts)
                     {
                         employee.IsLocked = true;
+                        employee.LockoutEndDate = DateTime.UtcNow.AddMinutes(_authSettings.LockoutDurationMinutes);
+                        response.IsLocked = true;
+                        response.LockoutEndDate = employee.LockoutEndDate;
+                        response.Message = $"Account locked due to too many failed attempts. Try again after {employee.LockoutEndDate.Value.ToLocalTime()}.";
                     }
-                    await _employeeRepository.UpdateAsync(employee);
-                    throw new UnauthorizedAccessException("Invalid credentials.");
+                    else
+                    {
+                        response.Message = "Invalid credentials.";
+                    }
+                    await _employeeRepository.UpdateLoginAttemptsAsync(employee); // Use new method
                 }
-                throw new UnauthorizedAccessException($"Failed to authenticate with SSO system. Status: {ex.StatusCode}. Message: {ex.Content}", ex);
+                else
+                {
+                    response.Message = $"Failed to authenticate with SSO system. Status: {ex.StatusCode}. Message: {ex.Content}";
+                }
             }
             catch (Exception ex)
             {
-                throw new UnauthorizedAccessException($"An unexpected error occurred during SSO authentication: {ex.Message}", ex);
+                response.Message = $"An unexpected error occurred during SSO authentication: {ex.Message}";
             }
             
-            employee.FailedLoginCount = 0;
-            await _employeeRepository.UpdateAsync(employee); 
+            return response;
+        }
 
-            
-            var localJwtToken = _jwtService.GenerateToken(employee);
-            
-            var employeeDto = MapEmployeeToDto(employee);
+        public async Task<LoginResponseDto> AdminLoginAsync(string email, string password)
+        {
+            var loginResponse = await LoginAsync(email, password);
 
-            return new LoginResponseDto
+            if (!loginResponse.IsSuccess)
             {
-                TokenDetails = ssoTokenResponse,
-                EmployeeDetails = employeeDto 
+                return loginResponse; // Return early if regular login failed or account is locked/unverified
+            }
+
+            // If login was successful, check for Admin role
+            if (!loginResponse.IsAdmin)
+            {
+                loginResponse.IsSuccess = false;
+                loginResponse.Message = "Access denied. Only administrators can log in to the Admin Portal.";
+                // Optionally, clear token details if not an admin
+                loginResponse.TokenDetails = new SsoTokenResponseDto();
+                loginResponse.EmployeeDetails = new EmployeeDto();
+            }
+
+            return loginResponse;
+        }
+
+        public async Task VerifyAccountAsync(string validationReference, string otp)
+        {
+            var otpValidationResult = await _otpHelperService.ValidateOtpAsync(validationReference, otp);
+
+            if (!otpValidationResult.IsSuccessful || otpValidationResult.Data?.Data?.UserReference == null)
+            {
+                throw new InvalidOperationException(otpValidationResult.Message ?? "OTP verification failed.");
+            }
+
+            var employeeEmail = otpValidationResult.Data.Data.UserReference;
+            var employee = await _employeeRepository.GetByEmailWithDepartmentAndRoleAsync(employeeEmail);
+
+            if (employee == null)
+            {
+                throw new InvalidOperationException("Employee not found for the provided OTP reference.");
+            }
+
+            if (employee.IsVerified)
+            {
+                throw new InvalidOperationException("Account is already verified.");
+            }
+
+            employee.IsVerified = true;
+            employee.UpdatedAt = DateTime.UtcNow;
+            await _employeeRepository.UpdateAsync(employee);
+
+            // Send welcome email after successful verification
+            var welcomeEmailBody = await BuildWelcomeEmailBodyAsync(employee.FullName);
+            var notificationRequest = new NotificationRequest
+            {
+                Channels = new List<string> { "Email" },
+                From = _notificationApiSettings.FromEmail,
+                To = employee.Email,
+                Subject = "Welcome to Laptop Requisition System",
+                Message = welcomeEmailBody
             };
+            var notificationResponse = await _notificationApi.SendNotificationAsync(notificationRequest);
+
+            if (!notificationResponse.IsSuccessStatusCode || notificationResponse.Content is null || !notificationResponse.Content.IsSuccessful)
+            {
+                // Log this error, but don't prevent account verification if email fails
+                // Consider a retry mechanism or admin notification for failed welcome emails
+                Console.WriteLine($"Warning: Failed to send welcome email to {employee.Email}: {notificationResponse.Error?.Content}");
+            }
         }
 
         public async Task<bool> RequestPasswordResetAsync(string email)
         {
-            var employee = await _employeeRepository.GetByEmailAsync(email);
+            var employee = await _employeeRepository.GetByEmailWithDepartmentAndRoleAsync(email);
             if (employee == null)
             {
-                return true; 
+                return true; // Security by obscurity
             }
 
-            if (employee.PasswordHash == string.Empty) 
+            if (employee.PasswordHash == string.Empty) // SSO managed user
             {
                 throw new InvalidOperationException("Password reset for this account is managed by the SSO system. Please use the SSO portal's password reset functionality.");
             }
@@ -200,7 +328,23 @@ namespace LaptopRequisition.Application.Services
             await _passwordResetTokenRepository.AddAsync(passwordResetToken);
             
             var resetLink = $"https://yourdomain.com/reset-password?token={token}";
-            await _emailService.SendEmailAsync(employee.Email, "Password Reset Request", $"Please use the following link to reset your password: {resetLink}");
+            // Replaced direct email service with Notification API
+            var emailBody = await BuildPasswordResetEmailBodyAsync(resetLink, employee.FullName);
+            var notificationRequest = new NotificationRequest
+            {
+                Channels = new List<string> { "Email" },
+                From = _notificationApiSettings.FromEmail,
+                To = employee.Email,
+                Subject = "Password Reset Request",
+                Message = emailBody
+            };
+            var notificationResponse = await _notificationApi.SendNotificationAsync(notificationRequest);
+
+            if (!notificationResponse.IsSuccessStatusCode || notificationResponse.Content is null || !notificationResponse.Content.IsSuccessful)
+            {
+                // Log error if notification failed
+                throw new InvalidOperationException($"Failed to send password reset email: {notificationResponse.Error?.Content}");
+            }
 
             return true;
         }
@@ -214,13 +358,19 @@ namespace LaptopRequisition.Application.Services
                 throw new InvalidOperationException("Invalid or expired password reset token.");
             }
 
-            var employee = await _employeeRepository.GetByIdAsync(resetToken.EmployeeId);
+            // Safely access EmployeeId from the nullable property
+            if (!resetToken.EmployeeId.HasValue)
+            {
+                throw new InvalidOperationException("Password reset token is not associated with an employee.");
+            }
+
+            var employee = await _employeeRepository.GetByIdWithDepartmentAndRoleAsync(resetToken.EmployeeId.Value);
             if (employee == null)
             {
                 throw new InvalidOperationException("Employee not found for the given token.");
             }
 
-            if (employee.PasswordHash == string.Empty)
+            if (employee.PasswordHash == string.Empty) // SSO managed user
             {
                 throw new InvalidOperationException("Password reset for this account is managed by the SSO system. Please use the SSO portal's password reset functionality.");
             }
@@ -258,13 +408,13 @@ namespace LaptopRequisition.Application.Services
 
         public async Task<bool> ChangePasswordAsync(Guid employeeId, string currentPassword, string newPassword)
         {
-            var employee = await _employeeRepository.GetByIdAsync(employeeId);
+            var employee = await _employeeRepository.GetByIdWithDepartmentAndRoleAsync(employeeId);
             if (employee == null)
             {
                 throw new InvalidOperationException("Employee not found.");
             }
             
-            if (employee.PasswordHash == string.Empty)
+            if (employee.PasswordHash == string.Empty) // SSO managed user
             {
                 throw new InvalidOperationException("Password change for this account is managed by the SSO system. Please use the SSO portal's password change functionality.");
             }
@@ -303,8 +453,7 @@ namespace LaptopRequisition.Application.Services
 
         private EmployeeDto MapEmployeeToDto(Employee employee)
         {
-            var department = _departmentRepository.GetByIdAsync(employee.DepartmentId).Result;
-            
+            // Department and Role are now eagerly loaded, so no need for .Result calls
             return new EmployeeDto
             {
                 Id = employee.Id,
@@ -313,10 +462,39 @@ namespace LaptopRequisition.Application.Services
                 Email = employee.Email,
                 PhoneNumber = employee.PhoneNumber,
                 DepartmentId = employee.DepartmentId,
-                DepartmentName = department?.Name ?? "Unknown",
-                Role = employee.Role,
+                DepartmentName = employee.Department?.Name ?? "Unknown", // Access directly from loaded Department
+                Role = employee.Role?.Name ?? "Unknown", // Access directly from loaded Role
                 IsLocked = employee.IsLocked
             };
+        }
+
+        // Helper method to build password reset email body from template
+        private async Task<string> BuildPasswordResetEmailBodyAsync(string resetLink, string employeeName)
+        {
+            var templatePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "EmailTemplates", "PasswordReset.html");
+            if (!File.Exists(templatePath))
+            {
+                // Fallback to a simple message if template not found
+                return $"Dear {employeeName},\n\nYour password reset link is: {resetLink}\n\nBest regards,\nLRS Team";
+            }
+            var body = await File.ReadAllTextAsync(templatePath);
+            return body
+                .Replace("{{employeeName}}", employeeName)
+                .Replace("{{resetLink}}", resetLink);
+        }
+
+        // Helper method to build welcome email body from template
+        private async Task<string> BuildWelcomeEmailBodyAsync(string employeeName)
+        {
+            var templatePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "EmailTemplates", "Welcome.html");
+            if (!File.Exists(templatePath))
+            {
+                // Fallback to a simple message if template not found
+                return $"Dear {employeeName},\n\nYour account has been successfully created. You can now log in to request laptops.\n\nBest regards,\nLRS Team";
+            }
+            var body = await File.ReadAllTextAsync(templatePath);
+            return body
+                .Replace("{{employeeName}}", employeeName);
         }
     }
 }

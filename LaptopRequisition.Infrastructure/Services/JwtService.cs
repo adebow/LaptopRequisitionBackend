@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System; // Added for DateTime
 
 namespace LaptopRequisition.Infrastructure.Services
 {
@@ -26,7 +27,7 @@ namespace LaptopRequisition.Infrastructure.Services
             {
                 new Claim(ClaimTypes.NameIdentifier, employee.Id.ToString()),
                 new Claim(ClaimTypes.Email, employee.Email),
-                new Claim(ClaimTypes.Role, employee.Role) 
+                new Claim(ClaimTypes.Role, employee.Role.Name) // Changed from employee.Role to employee.Role.Name
             });
 
             var tokenDescriptor = new SecurityTokenDescriptor

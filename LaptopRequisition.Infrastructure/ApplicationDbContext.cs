@@ -1,6 +1,9 @@
 ﻿using LaptopRequisition.Domain;
 using Microsoft.EntityFrameworkCore;
-
+using System; 
+using System.Linq; 
+using System.Threading; 
+using LaptopRequisition.Domain.Enums; 
 
 namespace LaptopRequisition.Infrastructure
 {
@@ -12,17 +15,18 @@ namespace LaptopRequisition.Infrastructure
 
         public DbSet<Employee> Employees { get; set; }
         public DbSet<Department> Departments { get; set; } 
-       public DbSet<Laptop> Laptops { get; set; }
+        public DbSet<Laptop> Laptops { get; set; }
         public DbSet<Request> Requests { get; set; }
         public DbSet<ReturnRequest> ReturnRequests { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
+        public DbSet<Role> Roles { get; set; } 
+        public DbSet<AuditLog> AuditLogs { get; set; } 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-
-           
+            
             modelBuilder.Entity<Employee>(entity =>
             {
                 entity.Property(e => e.StaffId).HasMaxLength(255); 
@@ -33,9 +37,15 @@ namespace LaptopRequisition.Infrastructure
                 entity.HasOne(e => e.Department)
                       .WithMany(d => d.Employees)
                       .HasForeignKey(e => e.DepartmentId);
-                });
+                
+                entity.HasOne(e => e.Role)
+                      .WithMany(r => r.Employees)
+                      .HasForeignKey(e => e.RoleId);
+                
+                entity.HasQueryFilter(e => !e.IsDeleted);
+            });
 
-            
+           
             modelBuilder.Entity<Department>(entity =>
             {
                 entity.HasMany(d => d.Employees)
@@ -48,36 +58,26 @@ namespace LaptopRequisition.Infrastructure
                 entity.HasData(
                     new Department
                     {
-                        Id = Guid.Parse("11111111-1111-1111-1111-111111111111"),
-                        Name = "Human Resources",
-                        CreatedAt = DateTime.UtcNow,
-                        UpdatedAt = DateTime.UtcNow
-                    },
-                    new Department
-                    {
-                        Id = Guid.Parse("22222222-2222-2222-2222-222222222222"),
-                        Name = "Management",
-                        CreatedAt = DateTime.UtcNow,
-                        UpdatedAt = DateTime.UtcNow
-                    },
-                    new Department
-                    {
-                        Id = Guid.Parse("33333333-3333-3333-3333-333333333333"),
-                        Name = "Finance",
-                        CreatedAt = DateTime.UtcNow,
-                        UpdatedAt = DateTime.UtcNow
-                    },
-                    new Department
-                    {
-                        Id = Guid.Parse("44444444-4444-4444-4444-444444444444"),
-                        Name = "Corporate Communications",
-                        CreatedAt = DateTime.UtcNow,
-                        UpdatedAt = DateTime.UtcNow
-                    },
-                    new Department
-                    {
-                        Id = Guid.Parse("55555555-5555-5555-5555-555555555555"),
+                        Id = Guid.Parse("55555555-5555-5555-5555-555555555555"), 
                         Name = "IT",
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow
+                    }
+                );
+            });
+            
+           
+            modelBuilder.Entity<Role>(entity =>
+            {
+                entity.Property(r => r.Name).HasMaxLength(50);
+                entity.HasIndex(r => r.Name).IsUnique();
+
+                entity.HasData(
+                    new Role
+                    {
+                        Id = Guid.Parse("11111111-1111-1111-1111-111111111111"), 
+                        Name = "Admin",
+                        Description = "Administrator with full access",
                         CreatedAt = DateTime.UtcNow,
                         UpdatedAt = DateTime.UtcNow
                     }
@@ -88,9 +88,10 @@ namespace LaptopRequisition.Infrastructure
             {
                 entity.Property(l => l.SerialNumber).HasMaxLength(255); 
                 entity.HasIndex(l => l.SerialNumber).IsUnique();
+                entity.Property(l => l.Status) 
+                      .HasConversion<string>();
             });
-
-         
+            
             modelBuilder.Entity<Request>(entity =>
             {
                 entity.HasIndex(r => r.EmployeeId);
@@ -100,14 +101,14 @@ namespace LaptopRequisition.Infrastructure
                 entity.HasOne(r => r.Employee)
                       .WithMany(e => e.Requests)
                       .HasForeignKey(r => r.EmployeeId);
+
                 entity.HasOne(r => r.Laptop)
                       .WithMany(l => l.Requests)
                       .HasForeignKey(r => r.LaptopId)
                       .IsRequired(false)
                       .OnDelete(DeleteBehavior.SetNull);
             });
-
-         
+            
             modelBuilder.Entity<ReturnRequest>(entity =>
             {
                 entity.HasOne(rr => rr.Employee)
@@ -127,7 +128,7 @@ namespace LaptopRequisition.Infrastructure
             
             modelBuilder.Entity<PasswordResetToken>(entity =>
             {
-                entity.Property(prt => prt.Token).HasMaxLength(255); // Added
+                entity.Property(prt => prt.Token).HasMaxLength(255);
                 entity.HasIndex(prt => prt.Token).IsUnique();
                 entity.HasOne(prt => prt.Employee)
                       .WithMany(e => e.PasswordResetTokens)
@@ -150,7 +151,7 @@ namespace LaptopRequisition.Infrastructure
         private void AddAuditInfo()
         {
             var entries = ChangeTracker.Entries()
-                .Where(e => (e.Entity is Request || e.Entity is Employee || e.Entity is Department || e.Entity is Laptop || e.Entity is ReturnRequest) && (e.State == EntityState.Added || e.State == EntityState.Modified));
+                .Where(e => (e.Entity is Request || e.Entity is Employee || e.Entity is Department || e.Entity is Laptop || e.Entity is ReturnRequest || e.Entity is Role) && (e.State == EntityState.Added || e.State == EntityState.Modified || e.State == EntityState.Deleted));
 
             foreach (var entry in entries)
             {
@@ -175,6 +176,12 @@ namespace LaptopRequisition.Infrastructure
                     }
                     else if (entry.State == EntityState.Modified)
                     {
+                        employee.UpdatedAt = DateTime.UtcNow;
+                    }
+                    else if (entry.State == EntityState.Deleted) 
+                    {
+                        entry.State = EntityState.Modified; 
+                        employee.IsDeleted = true; 
                         employee.UpdatedAt = DateTime.UtcNow;
                     }
                 }
@@ -212,6 +219,18 @@ namespace LaptopRequisition.Infrastructure
                     else if (entry.State == EntityState.Modified)
                     {
                         returnRequest.UpdatedAt = DateTime.UtcNow;
+                    }
+                }
+                else if (entry.Entity is Role role)
+                {
+                    if (entry.State == EntityState.Added)
+                    {
+                        role.CreatedAt = DateTime.UtcNow;
+                        role.UpdatedAt = DateTime.UtcNow;
+                    }
+                    else if (entry.State == EntityState.Modified)
+                    {
+                        role.UpdatedAt = DateTime.UtcNow;
                     }
                 }
             }

@@ -5,6 +5,6 @@ namespace LaptopRequisition.Domain.Enums
         Pending,
         Approved,
         Rejected,
-        Returned // Changed from Completed to Returned
+        Returned
     }
 }

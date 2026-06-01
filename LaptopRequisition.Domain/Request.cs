@@ -1,4 +1,5 @@
 ﻿using LaptopRequisition.Domain.Enums;
+using System;
 
 namespace LaptopRequisition.Domain
 {
@@ -6,7 +7,7 @@ namespace LaptopRequisition.Domain
     {
         public Guid Id { get; set; }
 
-        public Guid EmployeeId { get; set; }
+        public Guid? EmployeeId { get; set; }
 
         public Guid? LaptopId { get; set; }
 
@@ -14,9 +15,9 @@ namespace LaptopRequisition.Domain
 
         public RequestStatus Status { get; set; }
 
-        public string Purpose { get; set; }
+        public string Purpose { get; set; } = string.Empty;
 
-        public string PreferredSpecs { get; set; }
+        public string PreferredSpecs { get; set; } = string.Empty;
 
         public string? RejectionReason { get; set; }
 
@@ -32,7 +33,11 @@ namespace LaptopRequisition.Domain
 
         public DateTime? AssignedAt { get; set; }
 
-        public Employee Employee { get; set; }
+        public bool IsDismissed { get; set; }
+
+        public string? AlternativeDeviceNote { get; set; }
+
+        public Employee? Employee { get; set; }
 
         public Laptop? Laptop { get; set; }
     }

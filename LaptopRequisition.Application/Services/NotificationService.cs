@@ -1,4 +1,4 @@
-using LaptopRequisition.Application.DTOs;
+using LaptopRequisition.Application.DTOs.Notification;
 using LaptopRequisition.Application.Interfaces;
 using LaptopRequisition.Domain;
 using System;
@@ -24,7 +24,7 @@ namespace LaptopRequisition.Application.Services
             var notification = new Notification
             {
                 Id = Guid.NewGuid(),
-                EmployeeId = employeeId,
+                EmployeeId = employeeId, 
                 Message = message,
                 IsRead = false,
                 CreatedAt = DateTime.UtcNow
@@ -40,9 +40,10 @@ namespace LaptopRequisition.Application.Services
             return notifications.Select(n => MapToDto(n, employee?.FullName));
         }
 
-        public async Task<IEnumerable<NotificationResponseDto>> GetLatestNotificationsByEmployeeIdAsync(Guid employeeId, int count)
+        // Renamed and updated to use GetRecentNotificationsByEmployeeIdAsync
+        public async Task<IEnumerable<NotificationResponseDto>> GetRecentNotificationsByEmployeeIdAsync(Guid employeeId, int count)
         {
-            var notifications = await _notificationRepository.GetLatestByEmployeeIdAsync(employeeId, count);
+            var notifications = await _notificationRepository.GetRecentNotificationsByEmployeeIdAsync(employeeId, count);
             var employee = await _employeeRepository.GetByIdAsync(employeeId); 
 
             return notifications.Select(n => MapToDto(n, employee?.FullName));
@@ -55,7 +56,8 @@ namespace LaptopRequisition.Application.Services
             {
                 return null; 
             }
-            var employee = await _employeeRepository.GetByIdAsync(notification.EmployeeId);
+            // Handle nullable EmployeeId
+            var employee = notification.EmployeeId.HasValue ? await _employeeRepository.GetByIdAsync(notification.EmployeeId.Value) : null;
             return MapToDto(notification, employee?.FullName);
         }
 
@@ -83,13 +85,13 @@ namespace LaptopRequisition.Application.Services
             await _notificationRepository.UpdateRangeAsync(notifications);
         }
 
-        private NotificationResponseDto MapToDto(Notification notification, string employeeName)
+        private NotificationResponseDto MapToDto(Notification notification, string? employeeName) // Made employeeName nullable
         {
             return new NotificationResponseDto
             {
                 Id = notification.Id,
-                EmployeeId = notification.EmployeeId,
-                EmployeeName = employeeName,
+                EmployeeId = notification.EmployeeId, // Now correctly maps Guid? to Guid?
+                EmployeeName = employeeName ?? "Unknown", // Handle null employeeName
                 Message = notification.Message,
                 IsRead = notification.IsRead,
                 CreatedAt = notification.CreatedAt

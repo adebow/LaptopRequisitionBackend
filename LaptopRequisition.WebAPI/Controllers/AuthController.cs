@@ -1,7 +1,10 @@
-﻿using LaptopRequisition.Application.DTOs;
+﻿using LaptopRequisition.Application.DTOs.Login;
+
 using LaptopRequisition.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-
+using Microsoft.AspNetCore.Http; 
+using System;
+using LaptopRequisition.Application.DTOs;
 
 namespace LaptopRequisition.WebAPI.Controllers
 {
@@ -17,6 +20,9 @@ namespace LaptopRequisition.WebAPI.Controllers
         }
 
         [HttpPost("register")]
+        [ProducesResponseType(StatusCodes.Status202Accepted)] // Changed to 202 Accepted
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Register([FromBody] RegisterEmployeeDto registerDto)
         {
             if (!ModelState.IsValid)
@@ -27,7 +33,13 @@ namespace LaptopRequisition.WebAPI.Controllers
             try
             {
                 var employee = await _authService.RegisterEmployeeAsync(registerDto);
-                return StatusCode(201, new { Message = "Employee registered successfully", EmployeeId = employee.Id });
+                // Return 202 Accepted, indicating further action (OTP verification) is needed
+                return StatusCode(StatusCodes.Status202Accepted, new
+                {
+                    Message = "Employee registered successfully. Please verify your account with OTP.",
+                    EmployeeId = employee.Id,
+                    ValidationReference = registerDto.ValidationReference // Return validation reference for frontend to use in OTP verification
+                });
             }
             catch (InvalidOperationException ex)
             {
@@ -35,12 +47,15 @@ namespace LaptopRequisition.WebAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500,
+                return StatusCode(StatusCodes.Status500InternalServerError, // Use StatusCodes
                     new { Message = "An error occurred during registration.", Details = ex.Message });
             }
         }
 
         [HttpPost("login")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(LoginResponseDto))]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {
             if (!ModelState.IsValid)
@@ -50,8 +65,8 @@ namespace LaptopRequisition.WebAPI.Controllers
 
             try
             {
-                var token = await _authService.LoginAsync(loginDto.Email, loginDto.Password);
-                return Ok(new { Token = token });
+                var loginResponse = await _authService.LoginAsync(loginDto.Email, loginDto.Password); // Changed to LoginResponseDto
+                return Ok(loginResponse); // Return the full LoginResponseDto
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -59,11 +74,14 @@ namespace LaptopRequisition.WebAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { Message = "An error occurred during login.", Details = ex.Message });
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "An error occurred during login.", Details = ex.Message });
             }
         }
 
         [HttpPost("request-password-reset")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> RequestPasswordReset([FromBody] RequestPasswordResetDto requestDto)
         {
             if (!ModelState.IsValid)
@@ -79,35 +97,37 @@ namespace LaptopRequisition.WebAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500,
+                return StatusCode(StatusCodes.Status500InternalServerError,
                     new { Message = "An error occurred during password reset request.", Details = ex.Message });
+            }
+        }
+
+        // Uncommented and added ProducesResponseType for ResetPassword
+        [HttpPost("reset-password")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto resetDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                await _authService.ResetPasswordAsync(resetDto.Token, resetDto.NewPassword);
+                return Ok(new { Message = "Password has been reset successfully." });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "An error occurred during password reset.", Details = ex.Message });
             }
         }
     }
 }
-
-//         [HttpPost("reset-password")]
-//         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto resetDto)
-//         {
-//             if (!ModelState.IsValid)
-//             {
-//                 return BadRequest(ModelState);
-//             }
-//
-//             try
-//             {
-//                 await _authService.ResetPasswordAsync(resetDto.Token, resetDto.NewPassword);
-//                 return Ok(new { Message = "Password has been reset successfully." });
-//             }
-//             catch (InvalidOperationException ex)
-//             {
-//                 return BadRequest(new { Message = ex.Message });
-//             }
-//             catch (Exception ex)
-//             {
-//                 // Log the exception
-//                 return StatusCode(500, new { Message = "An error occurred during password reset.", Details = ex.Message });
-//             }
-//         }
-//     }
-// }
