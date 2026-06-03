@@ -16,8 +16,44 @@ namespace LaptopRequisition.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.27")
+                .HasAnnotation("ProductVersion", "8.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
+
+            modelBuilder.Entity("LaptopRequisition.Domain.AuditLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Changes")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<Guid>("EntityId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("EntityType")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AuditLogs");
+                });
 
             modelBuilder.Entity("LaptopRequisition.Domain.Department", b =>
                 {
@@ -46,38 +82,10 @@ namespace LaptopRequisition.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("11111111-1111-1111-1111-111111111111"),
-                            CreatedAt = new DateTime(2026, 5, 24, 13, 49, 38, 839, DateTimeKind.Utc).AddTicks(9253),
-                            Name = "Human Resources",
-                            UpdatedAt = new DateTime(2026, 5, 24, 13, 49, 38, 839, DateTimeKind.Utc).AddTicks(9256)
-                        },
-                        new
-                        {
-                            Id = new Guid("22222222-2222-2222-2222-222222222222"),
-                            CreatedAt = new DateTime(2026, 5, 24, 13, 49, 38, 839, DateTimeKind.Utc).AddTicks(9260),
-                            Name = "Management",
-                            UpdatedAt = new DateTime(2026, 5, 24, 13, 49, 38, 839, DateTimeKind.Utc).AddTicks(9261)
-                        },
-                        new
-                        {
-                            Id = new Guid("33333333-3333-3333-3333-333333333333"),
-                            CreatedAt = new DateTime(2026, 5, 24, 13, 49, 38, 839, DateTimeKind.Utc).AddTicks(9267),
-                            Name = "Finance",
-                            UpdatedAt = new DateTime(2026, 5, 24, 13, 49, 38, 839, DateTimeKind.Utc).AddTicks(9267)
-                        },
-                        new
-                        {
-                            Id = new Guid("44444444-4444-4444-4444-444444444444"),
-                            CreatedAt = new DateTime(2026, 5, 24, 13, 49, 38, 839, DateTimeKind.Utc).AddTicks(9271),
-                            Name = "Corporate Communications",
-                            UpdatedAt = new DateTime(2026, 5, 24, 13, 49, 38, 839, DateTimeKind.Utc).AddTicks(9272)
-                        },
-                        new
-                        {
                             Id = new Guid("55555555-5555-5555-5555-555555555555"),
-                            CreatedAt = new DateTime(2026, 5, 24, 13, 49, 38, 839, DateTimeKind.Utc).AddTicks(9274),
+                            CreatedAt = new DateTime(2026, 6, 2, 11, 45, 51, 879, DateTimeKind.Utc).AddTicks(2116),
                             Name = "IT",
-                            UpdatedAt = new DateTime(2026, 5, 24, 13, 49, 38, 839, DateTimeKind.Utc).AddTicks(9275)
+                            UpdatedAt = new DateTime(2026, 6, 2, 11, 45, 51, 879, DateTimeKind.Utc).AddTicks(2119)
                         });
                 });
 
@@ -105,8 +113,20 @@ namespace LaptopRequisition.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsFirstLogin")
+                        .HasColumnType("tinyint(1)");
+
                     b.Property<bool>("IsLocked")
                         .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsVerified")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<DateTime?>("LockoutEndDate")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
@@ -120,9 +140,11 @@ namespace LaptopRequisition.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("Role")
-                        .IsRequired()
+                    b.Property<string>("ProfilePictureUrl")
                         .HasColumnType("longtext");
+
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("char(36)");
 
                     b.Property<string>("StaffId")
                         .IsRequired()
@@ -139,6 +161,8 @@ namespace LaptopRequisition.Infrastructure.Migrations
                     b.HasIndex("Email")
                         .IsUnique();
 
+                    b.HasIndex("RoleId");
+
                     b.HasIndex("StaffId")
                         .IsUnique();
 
@@ -151,32 +175,74 @@ namespace LaptopRequisition.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
+                    b.Property<string>("AssetTag")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTime?>("AssignedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<Guid?>("AssignedToEmployeeId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("Brand")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<bool>("IsAssigned")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<string>("Name")
+                    b.Property<string>("Model")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<int>("OperatingSystem")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Processor")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTime>("PurchaseDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("RAM")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("ScreenSize")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("SerialNumber")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)");
 
-                    b.Property<string>("Specifications")
+                    b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("longtext");
+
+                    b.Property<string>("Storage")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<DateTime>("WarrantyExpiryDate")
+                        .HasColumnType("datetime(6)");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("AssignedToEmployeeId");
 
                     b.HasIndex("SerialNumber")
                         .IsUnique();
@@ -193,7 +259,7 @@ namespace LaptopRequisition.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<Guid>("EmployeeId")
+                    b.Property<Guid?>("EmployeeId")
                         .HasColumnType("char(36)");
 
                     b.Property<bool>("IsRead")
@@ -216,7 +282,7 @@ namespace LaptopRequisition.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
-                    b.Property<Guid>("EmployeeId")
+                    b.Property<Guid?>("EmployeeId")
                         .HasColumnType("char(36)");
 
                     b.Property<DateTime>("ExpiresAt")
@@ -246,6 +312,9 @@ namespace LaptopRequisition.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
+                    b.Property<string>("AlternativeDeviceNote")
+                        .HasColumnType("longtext");
+
                     b.Property<DateTime?>("ApprovedRejectedAt")
                         .HasColumnType("datetime(6)");
 
@@ -255,8 +324,11 @@ namespace LaptopRequisition.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<Guid>("EmployeeId")
+                    b.Property<Guid?>("EmployeeId")
                         .HasColumnType("char(36)");
+
+                    b.Property<bool>("IsDismissed")
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<bool>("IsReceiptConfirmed")
                         .HasColumnType("tinyint(1)");
@@ -308,7 +380,7 @@ namespace LaptopRequisition.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<Guid>("EmployeeId")
+                    b.Property<Guid?>("EmployeeId")
                         .HasColumnType("char(36)");
 
                     b.Property<Guid>("LaptopId")
@@ -337,6 +409,61 @@ namespace LaptopRequisition.Infrastructure.Migrations
                     b.ToTable("ReturnRequests");
                 });
 
+            modelBuilder.Entity("LaptopRequisition.Domain.Role", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(250)
+                        .HasColumnType("varchar(250)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Roles");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("11111111-1111-1111-1111-111111111111"),
+                            CreatedAt = new DateTime(2026, 6, 2, 11, 45, 51, 879, DateTimeKind.Utc).AddTicks(3476),
+                            Description = "Administrator with full access",
+                            Name = "Admin",
+                            UpdatedAt = new DateTime(2026, 6, 2, 11, 45, 51, 879, DateTimeKind.Utc).AddTicks(3477)
+                        },
+                        new
+                        {
+                            Id = new Guid("22222222-2222-2222-2222-222222222222"),
+                            CreatedAt = new DateTime(2026, 6, 2, 11, 45, 51, 879, DateTimeKind.Utc).AddTicks(3484),
+                            Description = "Standard employee with limited access",
+                            Name = "Employee",
+                            UpdatedAt = new DateTime(2026, 6, 2, 11, 45, 51, 879, DateTimeKind.Utc).AddTicks(3485)
+                        },
+                        new
+                        {
+                            Id = new Guid("33333333-3333-3333-3333-333333333333"),
+                            CreatedAt = new DateTime(2026, 6, 2, 11, 45, 51, 879, DateTimeKind.Utc).AddTicks(3490),
+                            Description = "Engineer specializing in backend development",
+                            Name = "Backend Engineer",
+                            UpdatedAt = new DateTime(2026, 6, 2, 11, 45, 51, 879, DateTimeKind.Utc).AddTicks(3490)
+                        });
+                });
+
             modelBuilder.Entity("LaptopRequisition.Domain.Employee", b =>
                 {
                     b.HasOne("LaptopRequisition.Domain.Department", "Department")
@@ -345,16 +472,31 @@ namespace LaptopRequisition.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("LaptopRequisition.Domain.Role", "Role")
+                        .WithMany("Employees")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Department");
+
+                    b.Navigation("Role");
+                });
+
+            modelBuilder.Entity("LaptopRequisition.Domain.Laptop", b =>
+                {
+                    b.HasOne("LaptopRequisition.Domain.Employee", "AssignedToEmployee")
+                        .WithMany()
+                        .HasForeignKey("AssignedToEmployeeId");
+
+                    b.Navigation("AssignedToEmployee");
                 });
 
             modelBuilder.Entity("LaptopRequisition.Domain.Notification", b =>
                 {
                     b.HasOne("LaptopRequisition.Domain.Employee", "Employee")
                         .WithMany("Notifications")
-                        .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("EmployeeId");
 
                     b.Navigation("Employee");
                 });
@@ -363,9 +505,7 @@ namespace LaptopRequisition.Infrastructure.Migrations
                 {
                     b.HasOne("LaptopRequisition.Domain.Employee", "Employee")
                         .WithMany("PasswordResetTokens")
-                        .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("EmployeeId");
 
                     b.Navigation("Employee");
                 });
@@ -374,9 +514,7 @@ namespace LaptopRequisition.Infrastructure.Migrations
                 {
                     b.HasOne("LaptopRequisition.Domain.Employee", "Employee")
                         .WithMany("Requests")
-                        .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("EmployeeId");
 
                     b.HasOne("LaptopRequisition.Domain.Laptop", "Laptop")
                         .WithMany("Requests")
@@ -392,9 +530,7 @@ namespace LaptopRequisition.Infrastructure.Migrations
                 {
                     b.HasOne("LaptopRequisition.Domain.Employee", "Employee")
                         .WithMany("ReturnRequests")
-                        .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("EmployeeId");
 
                     b.HasOne("LaptopRequisition.Domain.Laptop", "Laptop")
                         .WithMany("ReturnRequests")
@@ -428,6 +564,11 @@ namespace LaptopRequisition.Infrastructure.Migrations
                     b.Navigation("Requests");
 
                     b.Navigation("ReturnRequests");
+                });
+
+            modelBuilder.Entity("LaptopRequisition.Domain.Role", b =>
+                {
+                    b.Navigation("Employees");
                 });
 #pragma warning restore 612, 618
         }

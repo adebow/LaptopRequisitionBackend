@@ -16,6 +16,8 @@ namespace LaptopRequisition.Application.Interfaces
         Task UpdateAsync(Notification notification);
         Task DeleteAsync(Guid id);
         Task UpdateRangeAsync(IEnumerable<Notification> notifications);
-        Task<IEnumerable<Notification>> GetLatestByEmployeeIdAsync(Guid employeeId, int count); // Added this line
+        // Removed: Task<IEnumerable<Notification>> GetLatestByEmployeeIdAsync(Guid employeeId, int count);
+        Task<int> CountUnreadByEmployeeIdAsync(Guid employeeId); // Added
+        Task<IEnumerable<Notification>> GetRecentNotificationsByEmployeeIdAsync(Guid employeeId, int count); // Added
     }
 }

@@ -1,7 +1,10 @@
 ﻿using LaptopRequisition.Application.Interfaces;
 using LaptopRequisition.Domain;
 using Microsoft.EntityFrameworkCore;
-
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace LaptopRequisition.Infrastructure.Repositories
 {
@@ -13,7 +16,6 @@ namespace LaptopRequisition.Infrastructure.Repositories
         {
             _context = context;
         }
-
 
         public async Task AddAsync(Notification notification)
         {
@@ -46,14 +48,14 @@ Guid employeeId, bool unreadOnly = false)
             return await query.OrderByDescending(n => n.CreatedAt).ToListAsync();
         }
 
-        public async Task<IEnumerable<Notification>> GetLatestByEmployeeIdAsync(Guid employeeId, int count)
-        {
-            return await _context.Notifications
-                                .Where(n => n.EmployeeId == employeeId)
-                                .OrderByDescending(n => n.CreatedAt)
-                                .Take(count)
-                                .ToListAsync();
-        }
+        // Removed: public async Task<IEnumerable<Notification>> GetLatestByEmployeeIdAsync(Guid employeeId, int count)
+        // {
+        //     return await _context.Notifications
+        //                         .Where(n => n.EmployeeId == employeeId)
+        //                         .OrderByDescending(n => n.CreatedAt)
+        //                         .Take(count)
+        //                         .ToListAsync();
+        // }
 
         public async Task<IEnumerable<Notification>> GetAllAsync() // Implemented GetAllAsync
         {
@@ -74,6 +76,22 @@ Guid employeeId, bool unreadOnly = false)
         {
             _context.Notifications.UpdateRange(notifications);
             await _context.SaveChangesAsync();
+        }
+
+        // New methods for DashboardService
+        public async Task<int> CountUnreadByEmployeeIdAsync(Guid employeeId)
+        {
+            return await _context.Notifications
+                .CountAsync(n => n.EmployeeId == employeeId && !n.IsRead);
+        }
+
+        public async Task<IEnumerable<Notification>> GetRecentNotificationsByEmployeeIdAsync(Guid employeeId, int count)
+        {
+            return await _context.Notifications
+                .Where(n => n.EmployeeId == employeeId)
+                .OrderByDescending(n => n.CreatedAt)
+                .Take(count)
+                .ToListAsync();
         }
     }
 }
